@@ -13,7 +13,7 @@ interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export function Container({ children, className, as: Component = 'div', ...props }: ContainerProps) {
   return (
-    <Component className={cn("mx-auto w-full max-w-[1440px] px-6 md:px-12 lg:px-20", className)} {...props}>
+    <Component className={cn("mx-auto w-full max-w-[1440px] px-4 sm:px-6 md:px-12 lg:px-20", className)} {...props}>
       {children}
     </Component>
   );
@@ -30,7 +30,7 @@ interface SectionProps extends React.HTMLAttributes<HTMLElement> {
  */
 export function Section({ children, className, fullBleed = false, ...props }: SectionProps) {
   return (
-    <section className={cn("py-16 md:py-24 lg:py-32", className)} {...props}>
+    <section className={cn("py-12 sm:py-16 md:py-24 lg:py-32", className)} {...props}>
       {fullBleed ? children : <Container>{children}</Container>}
     </section>
   );

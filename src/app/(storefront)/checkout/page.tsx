@@ -237,7 +237,7 @@ export default function CheckoutPage() {
         <form onSubmit={handleSubmitOrder} className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           
           {/* Left: Customer Information & Delivery Details (7 cols) */}
-          <div className="lg:col-span-7 space-y-8 bg-white border border-[#1A1A1A]/10 p-6 md:p-10">
+          <div className="lg:col-span-7 space-y-8 bg-white border border-[#1A1A1A]/10 p-4 sm:p-6 md:p-10">
             
             {/* Section 1: Contact Information */}
             <div className="space-y-4">
@@ -446,7 +446,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Right: Order Summary & Confirmation CTA (5 cols) */}
-          <div className="lg:col-span-5 bg-white border border-[#1A1A1A]/10 p-6 md:p-8 space-y-6 sticky top-28">
+          <div className="lg:col-span-5 bg-white border border-[#1A1A1A]/10 p-4 sm:p-6 md:p-8 space-y-6 sticky top-28">
             <h3 className="font-serif text-xl font-bold tracking-tight border-b border-[#1A1A1A]/10 pb-4">
               {t.checkout.orderSummary}
             </h3>

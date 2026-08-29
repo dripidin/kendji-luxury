@@ -49,7 +49,7 @@ export function CartDrawer() {
       />
 
       {/* Slide-over Panel */}
-      <div className={`fixed inset-y-0 ${dir === 'rtl' ? 'left-0 pl-0 pr-10' : 'right-0 pl-10 pr-0'} max-w-full flex`}>
+      <div className={`fixed inset-y-0 ${dir === 'rtl' ? 'left-0 sm:pr-10' : 'right-0 sm:pl-10'} max-w-full flex`}>
         <aside 
           aria-label={t.cart.title}
           className="w-screen max-w-md bg-[#F9F9F7] text-[#1A1A1A] border-x border-[#1A1A1A]/10 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300"

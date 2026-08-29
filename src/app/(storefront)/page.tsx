@@ -21,20 +21,25 @@ export default async function HomePage() {
 
   // 1. Resolve Hero Product dynamically from CMS configuration or top published product
   const heroProductSlug = content.hero?.featured_product_slug
-  const heroProduct = await fetchHeroStorefrontProduct(heroProductSlug)
+  const primaryHero = await fetchHeroStorefrontProduct(heroProductSlug)
 
   // 2. Resolve Featured Products dynamically from authoritative database (is_featured = true & status = 'PUBLISHED')
   const allFeatured = await fetchFeaturedStorefrontProducts(8)
 
+  // Construct hero carousel list for 3.5s auto-swipe (Primary hero first, followed by other featured pieces)
+  const heroCarouselProducts = primaryHero
+    ? [primaryHero, ...allFeatured.filter(p => p.slug !== primaryHero.slug && p.id !== primaryHero.id)]
+    : allFeatured
+
   // Deduplication: If the hero product is also featured, exclude it from FeaturedPieces when other items exist
-  const featuredProducts = (allFeatured.length > 1 && heroProduct)
-    ? allFeatured.filter(p => p.slug !== heroProduct.slug && p.id !== heroProduct.id)
+  const featuredProducts = (allFeatured.length > 1 && primaryHero)
+    ? allFeatured.filter(p => p.slug !== primaryHero.slug && p.id !== primaryHero.id)
     : allFeatured
 
   return (
     <div className="flex flex-col w-full">
-      {/* 1. Hero / Brand Entry */}
-      <HeroSection content={content.hero} heroProduct={heroProduct} />
+      {/* 1. Hero / Brand Entry with 3.5s Auto-Swiping Signature Card */}
+      <HeroSection content={content.hero} heroProducts={heroCarouselProducts} />
 
       {/* 2. Curated Collection Introduction */}
       <CollectionIntro />
