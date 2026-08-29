@@ -90,6 +90,60 @@ export async function updateOrderStatusAction(
 }
 
 /**
+ * Cancels an order safely with operational reason
+ */
+export async function cancelOrderAction(
+  orderId: string,
+  reason: string = "Annulation demandée par l'administrateur"
+): Promise<OrderOperationResult> {
+  return updateOrderStatusAction(orderId, "CANCELLED", reason)
+}
+
+/**
+ * Safely delete an unfulfilled or test order
+ */
+export async function deleteTestOrderAction(orderId: string): Promise<OrderOperationResult> {
+  try {
+    const supabase = createAdminClient()
+
+    // 1. Verify order status
+    const { data: order, error: fetchErr } = await supabase
+      .from("orders")
+      .select("id, status")
+      .eq("id", orderId)
+      .single()
+
+    if (fetchErr || !order) {
+      return { success: false, error: "Commande introuvable." }
+    }
+
+    if (order.status === "DELIVERED") {
+      return {
+        success: false,
+        error: "Impossible de supprimer une commande livrée pour préserver l'historique comptable."
+      }
+    }
+
+    // 2. Delete related records
+    await supabase.from("order_items").delete().eq("order_id", orderId)
+    await supabase.from("deliveries").delete().eq("order_id", orderId)
+    const { error: delErr } = await supabase.from("orders").delete().eq("id", orderId)
+
+    if (delErr) {
+      return { success: false, error: delErr.message }
+    }
+
+    revalidatePath("/admin/orders")
+    revalidatePath("/admin/customers")
+
+    return { success: true, message: "Commande supprimée avec succès." }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Erreur de suppression."
+    return { success: false, error: msg }
+  }
+}
+
+/**
  * Dispatches order shipment via active CourierProvider abstraction
  */
 export async function createShipmentAction(

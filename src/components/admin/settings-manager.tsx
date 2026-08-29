@@ -19,7 +19,9 @@ import {
   saveCourierSettingsAction,
   saveTelegramSettingsAction,
   saveMetaSettingsAction,
-  saveLocalizationSettingsAction
+  saveLocalizationSettingsAction,
+  testCourierConnectionAction,
+  testTelegramNotificationAction
 } from '@/app/admin/actions/settings'
 import { ALGERIA_WILAYAS } from '@/lib/algeria-cities'
 import { Button } from '@/components/ui/button'
@@ -37,7 +39,8 @@ import {
   Languages,
   Truck,
   Building,
-  CreditCard
+  CreditCard,
+  Zap
 } from 'lucide-react'
 
 interface SettingsManagerProps {
@@ -61,6 +64,10 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
 
   // Status states
   const [isSaving, setIsSaving] = useState(false)
+  const [isTestingCourier, setIsTestingCourier] = useState(false)
+  const [isTestingTelegram, setIsTestingTelegram] = useState(false)
+  const [courierTestResult, setCourierTestResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [telegramTestResult, setTelegramTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [wilayaSearch, setWilayaSearch] = useState('')
@@ -135,6 +142,28 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
     const res = await saveLocalizationSettingsAction(localization)
     setIsSaving(false)
     showFeedback(res.success, res.error)
+  }
+
+  const handleTestCourier = async () => {
+    setIsTestingCourier(true)
+    setCourierTestResult(null)
+    const res = await testCourierConnectionAction(courier.active_provider)
+    setIsTestingCourier(false)
+    setCourierTestResult({
+      success: res.success,
+      message: res.success ? res.message || 'Connectivité validée' : res.error || 'Échec de connexion'
+    })
+  }
+
+  const handleTestTelegram = async () => {
+    setIsTestingTelegram(true)
+    setTelegramTestResult(null)
+    const res = await testTelegramNotificationAction(telegram.bot_token, telegram.chat_id)
+    setIsTestingTelegram(false)
+    setTelegramTestResult({
+      success: res.success,
+      message: res.success ? res.message || 'Notification envoyée avec succès' : res.error || 'Erreur Telegram'
+    })
   }
 
   const updateWilayaFee = (code: string, method: 'domicile' | 'stopDesk', value: number) => {
@@ -252,7 +281,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ident-email">Email Général</Label>
+                <Label htmlFor="ident-email">Email Contact</Label>
                 <Input
                   id="ident-email"
                   value={identity.contact_email}
@@ -260,39 +289,48 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="ident-whatsapp">WhatsApp Commercial</Label>
+                <Label htmlFor="ident-wa">Numéro WhatsApp (Format: +213...)</Label>
                 <Input
-                  id="ident-whatsapp"
+                  id="ident-wa"
+                  placeholder="+213550000000"
                   value={identity.whatsapp}
                   onChange={e => setIdentity({ ...identity, whatsapp: e.target.value })}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
-              <div className="space-y-2">
-                <Label htmlFor="ident-instagram">Instagram URL</Label>
-                <Input
-                  id="ident-instagram"
-                  value={identity.instagram}
-                  onChange={e => setIdentity({ ...identity, instagram: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ident-facebook">Facebook URL</Label>
-                <Input
-                  id="ident-facebook"
-                  value={identity.facebook}
-                  onChange={e => setIdentity({ ...identity, facebook: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ident-tiktok">TikTok URL</Label>
-                <Input
-                  id="ident-tiktok"
-                  value={identity.tiktok}
-                  onChange={e => setIdentity({ ...identity, tiktok: e.target.value })}
-                />
+            <div className="space-y-4 pt-4 border-t">
+              <Label className="text-xs font-semibold uppercase tracking-wider text-gray-500">
+                Liens Réseaux Sociaux
+              </Label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <Label htmlFor="ident-insta">Instagram (URL ou @handle)</Label>
+                  <Input
+                    id="ident-insta"
+                    placeholder="https://instagram.com/kendji_luxury"
+                    value={identity.instagram}
+                    onChange={e => setIdentity({ ...identity, instagram: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ident-fb">Facebook</Label>
+                  <Input
+                    id="ident-fb"
+                    placeholder="https://facebook.com/kendji.luxury"
+                    value={identity.facebook}
+                    onChange={e => setIdentity({ ...identity, facebook: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ident-tiktok">TikTok</Label>
+                  <Input
+                    id="ident-tiktok"
+                    placeholder="https://tiktok.com/@kendjiluxury"
+                    value={identity.tiktok}
+                    onChange={e => setIdentity({ ...identity, tiktok: e.target.value })}
+                  />
+                </div>
               </div>
             </div>
 
@@ -450,37 +488,44 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                           )}
                         </td>
                         <td className="p-3">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="50"
-                            value={domicileVal}
-                            onChange={e => updateWilayaFee(w.code, 'domicile', parseInt(e.target.value, 10))}
-                            className="h-8 w-28 text-xs font-mono"
-                          />
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              min="0"
+                              step="50"
+                              value={domicileVal}
+                              onChange={e => updateWilayaFee(w.code, 'domicile', parseInt(e.target.value))}
+                              className="w-24 h-8 text-xs font-mono"
+                            />
+                            <span className="text-gray-400 font-mono">DA</span>
+                          </div>
                         </td>
                         <td className="p-3">
-                          <Input
-                            type="number"
-                            min="0"
-                            step="50"
-                            value={stopDeskVal}
-                            onChange={e => updateWilayaFee(w.code, 'stopDesk', parseInt(e.target.value, 10))}
-                            className="h-8 w-28 text-xs font-mono"
-                          />
+                          <div className="flex items-center gap-1">
+                            <Input
+                              type="number"
+                              min="0"
+                              step="50"
+                              value={stopDeskVal}
+                              onChange={e => updateWilayaFee(w.code, 'stopDesk', parseInt(e.target.value))}
+                              className="w-24 h-8 text-xs font-mono"
+                            />
+                            <span className="text-gray-400 font-mono">DA</span>
+                          </div>
                         </td>
                         <td className="p-3 text-right">
-                          {isCustomized && (
+                          {isCustomized ? (
                             <Button
-                              type="button"
                               variant="ghost"
                               size="sm"
                               onClick={() => resetWilayaFee(w.code)}
-                              className="h-7 text-[11px] text-gray-500 hover:text-red-600 flex items-center gap-1"
-                              title="Rétablir tarif par défaut"
+                              className="h-7 px-2 text-[11px] text-gray-500 hover:text-red-600"
                             >
-                              <RotateCcw className="h-3 w-3" /> Défaut
+                              <RotateCcw className="h-3 w-3 mr-1" />
+                              Défaut
                             </Button>
+                          ) : (
+                            <span className="text-[11px] text-gray-400 italic">Tarif de base</span>
                           )}
                         </td>
                       </tr>
@@ -493,7 +538,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
         </Card>
       )}
 
-      {/* Tab 4: Courier Transport */}
+      {/* Tab 4: Courier Integrations */}
       {activeTab === 'courier' && (
         <Card>
           <CardHeader>
@@ -536,13 +581,39 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               </div>
             </div>
 
-            <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 space-y-2">
+            <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 space-y-3">
               <p className="font-semibold text-gray-900">Sécurité des Clés API Transporteur :</p>
               <p>
                 Les clés API et secrets de production Yalidine/ZR Express sont gérés de manière sécurisée côté serveur
                 (via les variables d&apos;environnement <code>YALIDINE_API_KEY</code> et <code>YALIDINE_API_SECRET</code>)
                 et ne sont jamais exposées publiquement dans le navigateur client.
               </p>
+
+              {/* Test courier connection button */}
+              <div className="pt-2 flex items-center gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestCourier}
+                  disabled={isTestingCourier}
+                  className="text-xs bg-white border-gray-300"
+                >
+                  {isTestingCourier ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Zap className="h-3.5 w-3.5 mr-1.5 text-amber-600" />}
+                  Tester la connexion {courier.active_provider}
+                </Button>
+                {courierTestResult && (
+                  <span
+                    className={`text-xs px-2.5 py-1 rounded font-medium ${
+                      courierTestResult.success
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}
+                  >
+                    {courierTestResult.message}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="pt-4 border-t flex justify-end">
@@ -633,6 +704,35 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 ))}
               </div>
             </div>
+
+            {/* Dry-run telegram notification button */}
+            <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold text-gray-900">Tester la réception d&apos;alertes :</p>
+                <p className="text-gray-500 text-[11px] mt-0.5">Envoie un message test à votre Chat ID pour vérifier la configuration.</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleTestTelegram}
+                disabled={isTestingTelegram || !telegram.chat_id}
+                className="text-xs bg-white border-gray-300 flex-shrink-0"
+              >
+                {isTestingTelegram ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5 text-blue-600" />}
+                Envoyer un message test
+              </Button>
+            </div>
+
+            {telegramTestResult && (
+              <div
+                className={`p-3 rounded-md text-xs ${
+                  telegramTestResult.success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'
+                }`}
+              >
+                {telegramTestResult.message}
+              </div>
+            )}
 
             <div className="pt-4 border-t flex justify-end">
               <Button
