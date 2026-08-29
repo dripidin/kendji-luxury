@@ -23,7 +23,8 @@ import {
   testCourierConnectionAction,
   testTelegramNotificationAction,
   testMetaPixelAction,
-  detectTelegramChatsAction
+  detectTelegramChatsAction,
+  syncEcotrackLiveFeesAction
 } from '@/app/admin/actions/settings'
 import { ALGERIA_WILAYAS } from '@/lib/algeria-cities'
 import { Button } from '@/components/ui/button'
@@ -75,6 +76,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [isDetectingTelegram, setIsDetectingTelegram] = useState(false)
   const [detectedChats, setDetectedChats] = useState<{ id: string | number; title: string; type: string; username?: string }[]>([])
   const [isTestingMeta, setIsTestingMeta] = useState(false)
+  const [isSyncingEcotrackFees, setIsSyncingEcotrackFees] = useState(false)
   const [courierTestResult, setCourierTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null)
   const [telegramTestResult, setTelegramTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [metaTestResult, setMetaTestResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -127,6 +129,21 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
     const res = await saveDeliverySettingsAction(delivery)
     setIsSaving(false)
     showFeedback(res.success, res.error)
+  }
+
+  const handleSyncEcotrackFees = async () => {
+    setIsSyncingEcotrackFees(true)
+    const res = await syncEcotrackLiveFeesAction()
+    setIsSyncingEcotrackFees(false)
+    if (res.success && res.fees) {
+      setDelivery(prev => ({
+        ...prev,
+        custom_fees: res.fees
+      }))
+      showFeedback(true, res.message)
+    } else {
+      showFeedback(false, res.error)
+    }
   }
 
   const handleSaveCourier = async () => {
@@ -451,21 +468,53 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border">
-              <div className="flex items-center gap-6">
-                <label className="flex items-center gap-2 text-xs font-semibold text-gray-900 cursor-pointer">
+            {/* Live API Info Banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-950">
+              <div className="flex items-start gap-2.5">
+                <Zap className="h-4 w-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-emerald-900">Tarification Directe API Ecotrack (GET /api/v1/get/fees)</p>
+                  <p className="text-emerald-700 text-[11px] mt-0.5">
+                    Le site et le checkout interrogent directement les tarifs officiels de votre compte transporteur en temps réel.
+                  </p>
+                </div>
+              </div>
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                onClick={handleSyncEcotrackFees}
+                disabled={isSyncingEcotrackFees}
+                className="bg-white border-emerald-300 text-emerald-800 hover:bg-emerald-100 flex-shrink-0 h-8 font-medium shadow-sm"
+              >
+                {isSyncingEcotrackFees ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" />
+                ) : (
+                  <RotateCcw className="h-3.5 w-3.5 mr-1.5 text-emerald-600" />
+                )}
+                Actualiser depuis l&apos;API Ecotrack
+              </Button>
+            </div>
+
+            {/* Global Delivery Settings toolbar */}
+            <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-gray-50 rounded-lg border">
+              <div className="flex flex-wrap items-center gap-6">
+                <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={delivery.cod_enabled}
                     onChange={e => setDelivery({ ...delivery, cod_enabled: e.target.checked })}
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4 rounded"
                   />
-                  <span>Paiement à la Livraison (COD) Actif</span>
+                  <span className="text-xs font-semibold text-gray-900">Activer le Paiement à la Livraison (COD)</span>
                 </label>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500 font-medium">Mode par défaut:</span>
+                  <Label htmlFor="def-method" className="text-xs text-gray-700">
+                    Mode par défaut :
+                  </Label>
                   <select
+                    id="def-method"
                     value={delivery.default_delivery_method}
                     onChange={e =>
                       setDelivery({

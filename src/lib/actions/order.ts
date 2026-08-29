@@ -9,6 +9,7 @@ import { resolveWilayaFee, getGlobalSettings } from "@/lib/settings"
 import { sendTelegramOrderNotification } from "@/lib/notifications/telegram"
 import { sendMetaPurchaseEvent } from "@/lib/analytics/meta-capi"
 import { getActiveCourierProvider } from "@/lib/courier/factory"
+import { EcotrackCourierAdapter } from "@/lib/courier/adapters/ecotrack-adapter"
 
 // Request validation schema
 const orderItemInputSchema = z.object({
@@ -140,10 +141,29 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
 
     // 5. Load settings with unmasked secrets for courier/notification credentials
     const globalSettings = await getGlobalSettings({ unmaskSecrets: true })
+
+    // Live Ecotrack API delivery fees (or cached settings)
+    let activeFees = globalSettings.delivery?.custom_fees
+    if (globalSettings.courier?.active_provider === 'ECOTRACK' && globalSettings.courier.enabled) {
+      try {
+        const courierCfg = globalSettings.courier
+        const adapter = new EcotrackCourierAdapter({
+          token: courierCfg.api_token || courierCfg.api_key || '',
+          baseUrl: courierCfg.base_url || 'https://app.ecotrack.dz'
+        })
+        const liveApiFees = await adapter.fetchLiveFees()
+        if (liveApiFees && Object.keys(liveApiFees).length > 0) {
+          activeFees = liveApiFees
+        }
+      } catch (feeErr) {
+        console.warn('[Order] Could not fetch live Ecotrack fees, using cached rates:', feeErr)
+      }
+    }
+
     const authoritativeDeliveryFee = resolveWilayaFee(
       wilayaObj.code,
       delivery.deliveryMethod,
-      globalSettings.delivery?.custom_fees
+      activeFees
     )
 
     // 6. Authoritative Total

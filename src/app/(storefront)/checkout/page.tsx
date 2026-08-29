@@ -49,6 +49,20 @@ export default function CheckoutPage() {
     })
   }, [subtotal, items])
 
+  // Live Ecotrack API delivery fees
+  const [liveFeesMap, setLiveFeesMap] = useState<Record<string, { domicile: number; stopDesk: number }> | null>(null)
+
+  useEffect(() => {
+    fetch('/api/delivery/fees')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && data?.fees) {
+          setLiveFeesMap(data.fees)
+        }
+      })
+      .catch(() => {})
+  }, [])
+
   // Communes list for the selected wilaya
   const availableCommunes = getCommunesByWilayaCode(selectedWilaya)
 
@@ -63,7 +77,12 @@ export default function CheckoutPage() {
     }
   }
 
-  const deliveryFee = deliveryMethod ? getDeliveryFee(selectedWilaya, deliveryMethod) : 0
+  const normWilaya = selectedWilaya.padStart(2, '0')
+  const deliveryFee = deliveryMethod
+    ? (liveFeesMap?.[normWilaya]
+        ? (deliveryMethod === 'DOMICILE' ? liveFeesMap[normWilaya].domicile : liveFeesMap[normWilaya].stopDesk)
+        : getDeliveryFee(selectedWilaya, deliveryMethod))
+    : 0
   const grandTotal = subtotal + deliveryFee
 
   const handleSubmitOrder = async (e: React.FormEvent) => {

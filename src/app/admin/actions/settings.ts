@@ -109,6 +109,64 @@ export async function saveDeliverySettingsAction(data: CodDeliverySettings) {
   }
 }
 
+/**
+ * Fetches live fees from active Ecotrack account (GET /api/v1/get/fees) and syncs to site_settings
+ */
+export async function syncEcotrackLiveFeesAction() {
+  try {
+    const supabase = createAdminClient()
+    const { data: current } = await supabase
+      .from('site_settings')
+      .select('*')
+      .eq('id', 1)
+      .single()
+
+    const courier = current?.integrations?.courier || {}
+    const token = courier.api_token || courier.api_key || process.env.ECOTRACK_API_KEY || ''
+    const baseUrl = courier.base_url || 'https://app.ecotrack.dz'
+
+    if (!token) {
+      return { success: false, error: "Aucun token API Ecotrack configuré." }
+    }
+
+    const adapter = new EcotrackCourierAdapter({ token, baseUrl })
+    const liveFees = await adapter.fetchLiveFees()
+
+    if (!liveFees || Object.keys(liveFees).length === 0) {
+      return { success: false, error: `Impossible de récupérer les tarifs depuis ${baseUrl}/api/v1/get/fees` }
+    }
+
+    const currentDelivery = current?.delivery_settings || {}
+    const count = Object.keys(liveFees).length
+
+    // Update site_settings custom_fees with authoritative live rates from Ecotrack
+    const { error } = await supabase
+      .from('site_settings')
+      .update({
+        delivery_settings: {
+          ...currentDelivery,
+          custom_fees: liveFees
+        },
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', 1)
+
+    if (error) return { success: false, error: error.message }
+
+    safeRevalidate('/admin/settings')
+    safeRevalidate('/checkout')
+
+    return {
+      success: true,
+      message: `${count} wilayas synchronisées avec succès depuis l'API Ecotrack (${baseUrl}).`,
+      fees: liveFees
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: `Erreur synchronisation API Ecotrack : ${msg}` }
+  }
+}
+
 export async function saveCourierSettingsAction(data: CourierSettings) {
   try {
     const supabase = createAdminClient()

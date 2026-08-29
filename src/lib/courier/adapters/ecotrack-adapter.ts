@@ -108,6 +108,50 @@ export class EcotrackCourierAdapter implements CourierProvider {
   }
 
   /**
+   * Fetches live delivery fees directly from Ecotrack Public API (GET /api/v1/get/fees)
+   */
+  async fetchLiveFees(): Promise<Record<string, { domicile: number; stopDesk: number }> | null> {
+    if (!this.hasValidCredentials()) return null;
+
+    try {
+      const targetUrl = `${this.baseUrl}/api/v1/get/fees`;
+      const res = await fetch(targetUrl, {
+        method: "GET",
+        headers: {
+          "Authorization": `Bearer ${this.token}`,
+          "Accept": "application/json"
+        },
+        cache: "no-store"
+      });
+
+      if (!res.ok) {
+        console.warn(`[Ecotrack] GET /api/v1/get/fees returned status ${res.status}`);
+        return null;
+      }
+
+      const data = await res.json();
+      const feesMap: Record<string, { domicile: number; stopDesk: number }> = {};
+
+      if (Array.isArray(data.livraison)) {
+        for (const item of data.livraison) {
+          const code = String(item.wilaya_id).padStart(2, "0");
+          const dom = parseInt(String(item.tarif), 10);
+          const desk = parseInt(String(item.tarif_stopdesk), 10);
+          feesMap[code] = {
+            domicile: isNaN(dom) ? 0 : dom,
+            stopDesk: isNaN(desk) ? 0 : desk
+          };
+        }
+      }
+
+      return feesMap;
+    } catch (err) {
+      console.error("[Ecotrack] Exception fetching live fees:", err);
+      return null;
+    }
+  }
+
+  /**
    * Create order on Ecotrack
    */
   async createShipment(request: ShipmentCreationRequest): Promise<ShipmentCreationResult> {
