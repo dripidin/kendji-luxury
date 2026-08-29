@@ -1,14 +1,19 @@
+'use client'
+
 import Link from "next/link"
 import { Container, Section } from "@/components/storefront/layout/container"
 import { ProductCard } from "@/components/storefront/product/product-card"
 import { Button } from "@/components/ui/button"
 import { getFeaturedProducts, getProductBySlug } from "@/lib/catalog"
+import { useI18n } from "@/lib/i18n/context"
 
 interface FeaturedPiecesProps {
   productSlugs?: string[]
 }
 
 export function FeaturedPieces({ productSlugs }: FeaturedPiecesProps) {
+  const { t } = useI18n()
+
   let products = (productSlugs && productSlugs.length > 0)
     ? productSlugs.map(slug => getProductBySlug(slug)).filter(Boolean)
     : getFeaturedProducts().slice(0, 4)
@@ -24,19 +29,22 @@ export function FeaturedPieces({ productSlugs }: FeaturedPiecesProps) {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div>
             <span className="text-[11px] uppercase tracking-[0.3em] text-[#1A1A1A]/60 font-sans block mb-2">
-              Curated Selection
+              {t.home.featuredBadge}
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-              Signature Pieces
+              {t.home.featuredTitle}
             </h2>
+            <p className="text-sm text-[#1A1A1A]/60 mt-1 font-light">
+              {t.home.featuredSubtitle}
+            </p>
           </div>
           
           <Link href="/shop" className="hidden sm:inline-block">
             <Button 
               variant="outline" 
-              className="border-[#1A1A1A]/20 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white px-8 py-5 text-xs uppercase tracking-[0.2em] transition-all duration-300"
+              className="border-[#1A1A1A]/20 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white px-8 py-5 text-xs uppercase tracking-[0.2em] transition-all duration-300 font-medium"
             >
-              View All Creations
+              {t.common.viewAll}
             </Button>
           </Link>
         </div>
@@ -59,7 +67,7 @@ export function FeaturedPieces({ productSlugs }: FeaturedPiecesProps) {
               variant="outline" 
               className="w-full border-[#1A1A1A]/20 text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-white py-6 text-xs uppercase tracking-[0.2em]"
             >
-              View All Creations
+              {t.common.viewAll}
             </Button>
           </Link>
         </div>

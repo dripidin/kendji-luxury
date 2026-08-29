@@ -4,6 +4,7 @@ import { useState } from "react"
 import Link from "next/link"
 import { Product, ProductVariant } from "@/lib/catalog"
 import { useCart } from "@/lib/cart/cart-context"
+import { useI18n } from "@/lib/i18n/context"
 import { Button } from "@/components/ui/button"
 import { ShieldCheck, Package, Truck, Check, ShoppingBag } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -15,6 +16,7 @@ interface ProductPurchasePanelProps {
 
 export function ProductPurchasePanel({ product, onVariantChange }: ProductPurchasePanelProps) {
   const { addItem } = useCart()
+  const { t, locale, dir } = useI18n()
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(
     product.variants && product.variants.length > 0 ? product.variants[0] : null
   )
@@ -40,11 +42,10 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
     })
   }
 
-  const formattedPrice = `${product.price.toLocaleString('fr-FR')} DA`
+  const formattedPrice = `${product.price.toLocaleString('fr-FR')} ${t.common.currencySymbol}`
 
   return (
-    <div className="space-y-8 text-[#1A1A1A]">
-      
+    <div className="space-y-8 text-[#1A1A1A]" dir={dir}>
       {/* Category & Collection Path */}
       <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.25em] text-[#1A1A1A]/60 font-sans">
         <Link href={`/category/${product.categorySlug}`} className="hover:text-[#1A1A1A] transition-colors">
@@ -67,7 +68,7 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
             {formattedPrice}
           </span>
           <span className="text-[11px] uppercase tracking-[0.2em] text-[#1A1A1A]/60 bg-[#F2F2EF] px-2.5 py-1 border border-[#1A1A1A]/10">
-            TTC • Paiement à la livraison
+            {t.common.codBadge}
           </span>
         </div>
       </div>
@@ -81,7 +82,7 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
       {product.variants && product.variants.length > 0 && (
         <div className="space-y-3 pt-2">
           <div className="flex justify-between items-center text-xs uppercase tracking-wider font-sans">
-            <span className="text-[#1A1A1A]/60">Finition / Variante:</span>
+            <span className="text-[#1A1A1A]/60">{t.product.selectVariant}:</span>
             <span className="font-semibold text-[#1A1A1A]">{selectedVariant?.name}</span>
           </div>
 
@@ -145,17 +146,19 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
           <div className="flex-1">
             <Button
               size="lg"
-              className="w-full h-14 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 transition-all duration-300 shadow-md"
+              className="w-full h-14 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 transition-all duration-300 shadow-md font-bold"
               onClick={handleAddToCart}
             >
               <ShoppingBag size={18} />
-              <span>Commander • Paiement à la Livraison</span>
+              <span>{t.common.orderNow}</span>
             </Button>
           </div>
         </div>
 
         <p className="text-[11px] text-[#1A1A1A]/60 font-sans text-center tracking-wide">
-          Confirmation immédiate par téléphone • Aucun prépaiement par carte requis
+          {locale === 'ar' 
+            ? 'تأكيد فوري عبر الهاتف • لا يتطلب أي دفع بالبطاقة البنكية' 
+            : 'Confirmation immédiate par téléphone • Aucun prépaiement par carte requis'}
         </p>
       </div>
 
@@ -165,10 +168,10 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
           <Truck size={18} className="text-[#1A1A1A] shrink-0 mt-0.5" strokeWidth={1.5} />
           <div>
             <span className="font-semibold block text-[#1A1A1A] uppercase tracking-wider text-[10px]">
-              Livraison Express en Algérie
+              {t.trust.wilayasShipping}
             </span>
             <span className="text-[#1A1A1A]/70 text-[11px]">
-              Expédition soignée à domicile ou en point relais avec suivi.
+              {t.trust.wilayasShippingSub}
             </span>
           </div>
         </div>
@@ -177,10 +180,10 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
           <ShieldCheck size={18} className="text-[#1A1A1A] shrink-0 mt-0.5" strokeWidth={1.5} />
           <div>
             <span className="font-semibold block text-[#1A1A1A] uppercase tracking-wider text-[10px]">
-              Paiement à la Réception (COD)
+              {t.trust.paymentOnDelivery}
             </span>
             <span className="text-[#1A1A1A]/70 text-[11px]">
-              Réglez le montant en espèces uniquement lors de la remise en main propre.
+              {t.trust.paymentOnDeliverySub}
             </span>
           </div>
         </div>
@@ -189,10 +192,10 @@ export function ProductPurchasePanel({ product, onVariantChange }: ProductPurcha
           <Package size={18} className="text-[#1A1A1A] shrink-0 mt-0.5" strokeWidth={1.5} />
           <div>
             <span className="font-semibold block text-[#1A1A1A] uppercase tracking-wider text-[10px]">
-              Écrin & Présentation Cadeau
+              {t.trust.velvetPackaging}
             </span>
             <span className="text-[#1A1A1A]/70 text-[11px]">
-              Chaque bijou est livré prêt à offrir dans son coffret protecteur KenDji.
+              {t.trust.velvetPackagingSub}
             </span>
           </div>
         </div>

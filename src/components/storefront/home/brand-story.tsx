@@ -1,8 +1,12 @@
+'use client'
+
 import Image from "next/image"
 import { Container, Section } from "@/components/storefront/layout/container"
 import { BACKGROUND_ASSETS } from "@/lib/catalog"
+import { useI18n } from "@/lib/i18n/context"
 
 export function BrandStory() {
+  const { t, locale } = useI18n()
   const bg = BACKGROUND_ASSETS['KJ-BG-06']
 
   return (
@@ -25,10 +29,10 @@ export function BrandStory() {
             {/* Minimalist Floating Caption Box */}
             <div className="absolute -bottom-6 -right-6 hidden sm:block bg-white p-6 border border-[#1A1A1A]/10 shadow-sm max-w-xs">
               <p className="font-serif text-sm italic text-[#1A1A1A]">
-                &ldquo;Restraint is the highest form of luxury.&rdquo;
+                {locale === 'ar' ? '«البساطة الراقية هي أسمى درجات الفخامة.»' : '« La simplicité raffinée est la forme suprême du luxe. »'}
               </p>
               <span className="text-[10px] uppercase tracking-[0.2em] text-[#1A1A1A]/60 block mt-2 font-sans">
-                KenDji Atelier Philosophy
+                {locale === 'ar' ? 'فلسفة دار كندجي' : 'Philosophie Maison KenDji'}
               </span>
             </div>
           </div>
@@ -37,41 +41,38 @@ export function BrandStory() {
           <div className="lg:col-span-6 space-y-8">
             <div className="space-y-3">
               <span className="text-[11px] uppercase tracking-[0.3em] text-[#1A1A1A]/60 font-sans block">
-                Atelier & Craftsmanship
+                {t.home.storyBadge}
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#1A1A1A] leading-tight">
-                Designed for Presence, <br />
-                <span className="font-normal italic">Refined by Restraint.</span>
+                {t.home.storyTitle}
               </h2>
             </div>
 
             <div className="space-y-6 text-sm text-[#1A1A1A]/80 font-sans leading-relaxed font-light">
+              <p>{t.home.storyP1}</p>
+              <p>{t.home.storyP2}</p>
               <p>
-                At KenDji Luxury, we believe that true elegance does not compete for attention—it commands it through balance and architectural clarity. Every piece in our boutique is selected to act as an intimate extension of your personal style.
-              </p>
-              <p>
-                Our collections emphasize enduring finishes and deliberate weight, selecting resilient stainless steel alloys (<em>Acier Inoxydable</em>), high-polish gold plating, and luminous pavé settings tailored for everyday grace and celebratory moments alike.
-              </p>
-              <p>
-                From delicate signature clover parures to sculptural nail bangles and calligraphy medals, our curation represents transparency, authentic design, and attentive presentation.
+                {locale === 'ar'
+                  ? 'من أطقم الكلوفر الأيقونية إلى الأساور المرصعة والقلادات الشاعرية، تضمن لك دار كندجي تجربة اقتناء راقية مع الدفع نقداً عند استلام مجوهراتك.'
+                  : 'Des parures signatures aux bracelets sculpturaux, chaque création célèbre votre féminité avec une livraison soignée et sécurisée partout en Algérie.'}
               </p>
             </div>
 
             <div className="pt-4 grid grid-cols-2 gap-6 border-t border-[#1A1A1A]/10 text-xs font-sans">
               <div>
                 <h4 className="font-semibold text-sm uppercase tracking-wider text-[#1A1A1A] mb-1">
-                  Material Transparency
+                  {locale === 'ar' ? 'جودة وتألق دائم' : 'Matériaux Nobles'}
                 </h4>
                 <p className="text-[#1A1A1A]/70 leading-normal">
-                  Carefully verified finishes and stainless steel selections documented per creation.
+                  {locale === 'ar' ? 'ستانلس ستيل وطلاء ذهبي مقاوم للتغير.' : 'Acier inoxydable de haute qualité et finitions dorées durables.'}
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold text-sm uppercase tracking-wider text-[#1A1A1A] mb-1">
-                  Artisanal Presentation
+                  {locale === 'ar' ? 'تغليف هدايا فاخر' : 'Écrin Signature'}
                 </h4>
                 <p className="text-[#1A1A1A]/70 leading-normal">
-                  Delivered in signature protective packaging ready for gifting and preservation.
+                  {locale === 'ar' ? 'علبة مخملية راقية جاهزة للإهداء ومرفقة ببطاقة ضمان.' : 'Chaque bijou est livré prêt à offrir dans son écrin de velours.'}
                 </p>
               </div>
             </div>

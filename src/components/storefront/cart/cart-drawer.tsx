@@ -4,11 +4,13 @@ import { useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useCart } from "@/lib/cart/cart-context"
+import { useI18n } from "@/lib/i18n/context"
 import { X, Trash2, ShoppingBag, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function CartDrawer() {
   const { items, isOpen, closeCart, updateQuantity, removeItem, subtotal, itemCount } = useCart()
+  const { t, locale, dir } = useI18n()
 
   // Close on Escape key
   useEffect(() => {
@@ -35,10 +37,10 @@ export function CartDrawer() {
 
   if (!isOpen) return null
 
-  const formattedSubtotal = `${subtotal.toLocaleString('fr-FR')} DA`
+  const formattedSubtotal = `${subtotal.toLocaleString('fr-FR')} ${t.common.currencySymbol}`
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-hidden" dir={dir}>
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity animate-in fade-in duration-300"
@@ -47,24 +49,23 @@ export function CartDrawer() {
       />
 
       {/* Slide-over Panel */}
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className={`fixed inset-y-0 ${dir === 'rtl' ? 'left-0 pl-0 pr-10' : 'right-0 pl-10 pr-0'} max-w-full flex`}>
         <aside 
-          aria-label="Shopping Cart Drawer"
-          className="w-screen max-w-md bg-[#F9F9F7] text-[#1A1A1A] border-l border-[#1A1A1A]/10 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300"
+          aria-label={t.cart.title}
+          className="w-screen max-w-md bg-[#F9F9F7] text-[#1A1A1A] border-x border-[#1A1A1A]/10 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300"
         >
-          
           {/* Header */}
           <div className="p-6 border-b border-[#1A1A1A]/10 flex items-center justify-between bg-white">
             <div className="flex items-center gap-3">
               <ShoppingBag size={20} strokeWidth={1.5} />
               <h2 className="font-serif text-lg font-bold tracking-tight">
-                Votre Panier ({itemCount})
+                {t.cart.title} ({itemCount})
               </h2>
             </div>
             <button
               type="button"
               onClick={closeCart}
-              aria-label="Fermer le panier"
+              aria-label="Close cart"
               className="p-2 -mr-2 text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors"
             >
               <X size={20} />
@@ -76,9 +77,9 @@ export function CartDrawer() {
             {items.length === 0 ? (
               <div className="py-20 text-center space-y-4">
                 <ShoppingBag size={40} strokeWidth={1} className="mx-auto text-[#1A1A1A]/30" />
-                <p className="font-serif text-lg font-medium text-[#1A1A1A]">Votre panier est vide</p>
+                <p className="font-serif text-lg font-medium text-[#1A1A1A]">{t.cart.empty}</p>
                 <p className="text-xs text-[#1A1A1A]/60 font-sans max-w-xs mx-auto">
-                  Découvrez nos créations exclusives et ajoutez vos bijoux favoris.
+                  {t.cart.emptySub}
                 </p>
                 <div className="pt-2">
                   <Button
@@ -86,16 +87,15 @@ export function CartDrawer() {
                     variant="outline"
                     className="border-[#1A1A1A]/20 text-xs uppercase tracking-widest px-6"
                   >
-                    Explorer la Boutique
+                    {t.cart.continueShopping}
                   </Button>
                 </div>
               </div>
             ) : (
               items.map((item) => {
-                const lineTotal = `${(item.unitPrice * item.quantity).toLocaleString('fr-FR')} DA`
+                const lineTotal = `${(item.unitPrice * item.quantity).toLocaleString('fr-FR')} ${t.common.currencySymbol}`
                 return (
                   <div key={item.key} className="flex gap-4 p-3 bg-white border border-[#1A1A1A]/10">
-                    
                     {/* Thumbnail */}
                     <div className="h-20 w-16 relative bg-[#F2F2EF] shrink-0 border border-[#1A1A1A]/5 overflow-hidden">
                       <Image
@@ -117,7 +117,7 @@ export function CartDrawer() {
                           <button
                             type="button"
                             onClick={() => removeItem(item.key)}
-                            aria-label={`Supprimer ${item.name}`}
+                            aria-label={`Remove ${item.name}`}
                             className="text-[#1A1A1A]/40 hover:text-red-600 transition-colors p-1"
                           >
                             <Trash2 size={14} />
@@ -126,7 +126,7 @@ export function CartDrawer() {
 
                         {item.variantName && (
                           <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/60 font-sans block mt-0.5">
-                            Finition: {item.variantName}
+                            {locale === 'ar' ? 'الخيار: ' : 'Finition: '} {item.variantName}
                           </span>
                         )}
                       </div>
@@ -157,9 +157,7 @@ export function CartDrawer() {
                           {lineTotal}
                         </span>
                       </div>
-
                     </div>
-
                   </div>
                 )
               })
@@ -172,14 +170,14 @@ export function CartDrawer() {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs uppercase tracking-widest text-[#1A1A1A]/60 font-sans">
-                    Sous-total
+                    {t.cart.subtotal}
                   </span>
                   <span className="font-sans text-xl font-bold text-[#1A1A1A]">
                     {formattedSubtotal}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#1A1A1A]/60 font-sans">
-                  Frais de livraison calculés à l&apos;étape de validation • Paiement à la réception (COD).
+                  {t.cart.freeShippingNotice}
                 </p>
               </div>
 
@@ -187,22 +185,21 @@ export function CartDrawer() {
                 <Link href="/checkout" onClick={closeCart} className="block w-full">
                   <Button
                     size="lg"
-                    className="w-full h-14 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-md"
+                    className="w-full h-14 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-md font-bold"
                   >
-                    <span>Commander (COD)</span>
-                    <ArrowRight size={16} />
+                    <span>{t.cart.checkout}</span>
+                    <ArrowRight size={16} className={dir === 'rtl' ? 'rotate-180' : ''} />
                   </Button>
                 </Link>
 
                 <Link href="/cart" onClick={closeCart} className="block w-full text-center">
                   <span className="text-xs uppercase tracking-widest text-[#1A1A1A]/60 hover:text-[#1A1A1A] transition-colors inline-block py-1 font-sans">
-                    Voir le panier complet
+                    {t.cart.continueShopping}
                   </span>
                 </Link>
               </div>
             </div>
           )}
-
         </aside>
       </div>
     </div>

@@ -1,19 +1,23 @@
+'use client'
+
 import Image from "next/image"
 import Link from "next/link"
 import { Container } from "@/components/storefront/layout/container"
 import { Button } from "@/components/ui/button"
 import { BACKGROUND_ASSETS } from "@/lib/catalog"
 import { FinalCtaSectionContent } from "@/lib/cms"
+import { useI18n } from "@/lib/i18n/context"
 
 interface FinalCTAProps {
   content?: FinalCtaSectionContent
 }
 
 export function FinalCTA({ content }: FinalCTAProps) {
+  const { t } = useI18n()
   const bgPath = content?.background_media || BACKGROUND_ASSETS['KJ-BG-05'].path
-  const title = content?.title || "An Invitation to Timeless Elegance."
-  const description = content?.description || "Discover the complete curation of high jewelry sets, sculptural bracelets, and delicate necklaces."
-  const ctaLabel = content?.cta_label || "Explore Full Catalog"
+  const title = content?.title || t.home.ctaTitle
+  const description = content?.description || t.home.ctaSubtitle
+  const ctaLabel = content?.cta_label || t.home.ctaButton
   const ctaUrl = content?.cta_url || "/shop"
 
   return (
@@ -32,7 +36,7 @@ export function FinalCTA({ content }: FinalCTAProps) {
 
       <Container className="relative z-10 text-center max-w-2xl mx-auto space-y-8">
         <span className="text-[11px] uppercase tracking-[0.35em] text-white/70 font-sans block">
-          KenDji Boutique
+          {t.common.brandName}
         </span>
 
         <h2 className="font-serif text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight">
@@ -47,7 +51,7 @@ export function FinalCTA({ content }: FinalCTAProps) {
           <Link href={ctaUrl}>
             <Button 
               size="lg" 
-              className="px-12 py-7 text-xs uppercase tracking-[0.25em] bg-white text-[#1A1A1A] hover:bg-[#F9F9F7] transition-all duration-300 shadow-xl"
+              className="px-12 py-7 text-xs uppercase tracking-[0.25em] bg-white text-[#1A1A1A] hover:bg-[#F9F9F7] transition-all duration-300 shadow-xl font-bold"
             >
               {ctaLabel}
             </Button>

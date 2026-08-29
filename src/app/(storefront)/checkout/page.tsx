@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
 import { useCart } from "@/lib/cart/cart-context"
+import { useI18n } from "@/lib/i18n/context"
 import { ALGERIA_WILAYAS, getCommunesByWilayaCode, getDeliveryFee } from "@/lib/algeria-cities"
 import { createCodOrder } from "@/lib/actions/order"
 import { trackEvent } from "@/lib/analytics"
@@ -17,6 +18,7 @@ import { ShieldCheck, Truck, ArrowLeft, Loader2, CheckCircle2, AlertCircle } fro
 export default function CheckoutPage() {
   const router = useRouter()
   const { items, subtotal, clearCart } = useCart()
+  const { t, locale, dir } = useI18n()
 
   const [fullName, setFullName] = useState("")
   const [phone, setPhone] = useState("")
@@ -67,22 +69,22 @@ export default function CheckoutPage() {
     setErrorMessage(null)
 
     if (items.length === 0) {
-      setErrorMessage("Votre panier est vide. Veuillez ajouter un bijou avant de commander.")
+      setErrorMessage(locale === 'ar' ? "سلة المشتريات فارغة." : "Votre panier est vide. Veuillez ajouter un bijou avant de commander.")
       return
     }
 
     if (!fullName.trim()) {
-      setErrorMessage("Veuillez saisir votre nom et prénom.")
+      setErrorMessage(locale === 'ar' ? "يرجى كتابة الاسم واللقب." : "Veuillez saisir votre nom et prénom.")
       return
     }
 
     if (!phone.trim()) {
-      setErrorMessage("Veuillez saisir votre numéro de téléphone.")
+      setErrorMessage(locale === 'ar' ? "يرجى كتابة رقم الهاتف." : "Veuillez saisir votre numéro de téléphone.")
       return
     }
 
     if (!address.trim()) {
-      setErrorMessage("Veuillez saisir votre adresse complète.")
+      setErrorMessage(locale === 'ar' ? "يرجى كتابة العنوان بالتفصيل." : "Veuillez saisir votre adresse complète.")
       return
     }
 
@@ -98,57 +100,66 @@ export default function CheckoutPage() {
         },
         delivery: {
           wilaya: selectedWilaya,
-          commune: selectedCommune.trim(),
+          commune: selectedCommune,
           address: address.trim(),
           deliveryMethod
         },
-        items: items.map(item => ({
-          productId: item.productId,
-          variantId: item.variantId,
-          quantity: item.quantity
+        items: items.map(i => ({
+          productId: i.productId,
+          variantId: i.variantId,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice
         })),
         idempotencyToken
       }
 
-      const result = await createCodOrder(payload)
+      const res = await createCodOrder(payload)
 
-      if (result.success && result.orderNumber) {
-        trackEvent('purchase', {
-          order_id: result.orderNumber,
-          value: result.total,
-          currency: 'DZD',
-          wilaya: selectedWilaya
-        })
-
-        // Store confirmation data for thank you page
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem(`order_conf_${result.orderNumber}`, JSON.stringify(result))
-        }
-
-        clearCart()
-        router.push(`/checkout/confirmation/${result.orderNumber}`)
-      } else {
-        setErrorMessage(result.error || "Une erreur est survenue lors de l'enregistrement de votre commande.")
-        setIsSubmitting(false)
+      if (!res.success) {
+        throw new Error(res.error || (locale === 'ar' ? "حدث خطأ أثناء معالجة الطلب." : "Échec de l'enregistrement de la commande."))
       }
-    } catch {
-      setErrorMessage("Impossible de joindre le serveur. Veuillez vérifier votre connexion.")
+
+      // Track purchase event
+      trackEvent('purchase', {
+        transaction_id: res.orderNumber || 'ORDER',
+        value: grandTotal,
+        currency: 'DZD',
+        items: items.map(i => ({
+          item_id: i.productId,
+          item_name: i.name,
+          item_variant: i.variantName,
+          price: i.unitPrice,
+          quantity: i.quantity
+        }))
+      })
+
+      // Clear the cart
+      clearCart()
+
+      // Redirect to confirmation page
+      router.push(`/order/confirmation?num=${res.orderNumber || ''}`)
+
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      setErrorMessage(msg)
+    } finally {
       setIsSubmitting(false)
     }
   }
 
   if (items.length === 0) {
     return (
-      <div className="pt-32 pb-24 bg-[#F9F9F7] min-h-[70vh] flex items-center">
-        <Container>
-          <div className="max-w-md mx-auto text-center space-y-6 bg-white border border-[#1A1A1A]/10 p-10">
-            <h2 className="font-serif text-2xl font-bold">Votre panier est vide</h2>
-            <p className="text-sm text-[#1A1A1A]/70 font-sans font-light">
-              Veuillez sélectionner vos bijoux avant de procéder à la commande.
-            </p>
-            <Link href="/shop" className="block">
+      <div className="pt-32 pb-24 bg-[#F9F9F7] text-[#1A1A1A] min-h-[70vh] flex items-center" dir={dir}>
+        <Container className="text-center max-w-md mx-auto space-y-6 bg-white p-8 border border-[#1A1A1A]/10">
+          <CheckCircle2 size={48} className="mx-auto text-[#1A1A1A]/40" />
+          <h2 className="font-serif text-2xl font-bold tracking-tight">{t.cart.empty}</h2>
+          <p className="text-sm text-[#1A1A1A]/60 font-sans">
+            {t.cart.emptySub}
+          </p>
+          <div className="pt-2">
+            <Link href="/shop">
               <Button className="w-full bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-widest py-4">
-                Explorer la Boutique
+                {t.common.shopNow}
               </Button>
             </Link>
           </div>
@@ -158,23 +169,23 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="pt-28 pb-24 bg-[#F9F9F7] text-[#1A1A1A] min-h-screen">
+    <div className="pt-28 pb-24 bg-[#F9F9F7] text-[#1A1A1A] min-h-screen" dir={dir}>
       <Container>
         
         {/* Navigation back */}
         <div className="mb-8">
           <Link href="/cart" className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-[#1A1A1A]/60 hover:text-[#1A1A1A] font-sans">
-            <ArrowLeft size={14} />
-            <span>Retour au panier</span>
+            <ArrowLeft size={14} className={dir === 'rtl' ? 'rotate-180' : ''} />
+            <span>{t.common.back}</span>
           </Link>
         </div>
 
         <div className="border-b border-[#1A1A1A]/10 pb-6 mb-10">
           <span className="text-[11px] uppercase tracking-[0.3em] text-[#1A1A1A]/60 font-sans block mb-2">
-            Finalisation de Commande
+            {t.checkout.title}
           </span>
           <h1 className="font-serif text-3xl sm:text-4xl font-bold tracking-tight">
-            Paiement à la Livraison (Cash on Delivery)
+            {t.checkout.subtitle}
           </h1>
         </div>
 
@@ -182,7 +193,7 @@ export default function CheckoutPage() {
           <div className="mb-8 p-4 bg-red-50 border border-red-200 text-red-800 text-xs font-sans flex items-start gap-3">
             <AlertCircle size={18} className="shrink-0 mt-0.5" />
             <div>
-              <span className="font-semibold block">Attention:</span>
+              <span className="font-semibold block">{locale === 'ar' ? 'تنبيه:' : 'Attention:'}</span>
               <span>{errorMessage}</span>
             </div>
           </div>
@@ -197,23 +208,23 @@ export default function CheckoutPage() {
             <div className="space-y-4">
               <div className="border-b border-[#1A1A1A]/10 pb-3 flex items-center justify-between">
                 <h3 className="font-serif text-lg font-bold tracking-tight">
-                  1. Vos Coordonnées
+                  {locale === 'ar' ? '1. المعلومات الشخصية' : '1. Vos Coordonnées'}
                 </h3>
                 <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/50 font-sans">
-                  * Champs obligatoires
+                  {locale === 'ar' ? '* حقول إجبارية' : '* Champs obligatoires'}
                 </span>
               </div>
 
               <div className="space-y-4 font-sans text-xs">
                 <div className="space-y-1.5">
                   <Label htmlFor="fullName" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                    Nom et Prénom *
+                    {t.checkout.fullName} *
                   </Label>
                   <Input
                     id="fullName"
                     type="text"
                     required
-                    placeholder="Ex: Amina Benali"
+                    placeholder={locale === 'ar' ? "مثال: أمينة بن علي" : "Ex: Amina Benali"}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm"
@@ -223,7 +234,7 @@ export default function CheckoutPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <Label htmlFor="phone" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                      Téléphone Mobile *
+                      {t.checkout.phone} *
                     </Label>
                     <Input
                       id="phone"
@@ -232,33 +243,33 @@ export default function CheckoutPage() {
                       placeholder="05XX XX XX XX / 06XX..."
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm"
+                      className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm font-mono"
                     />
                   </div>
 
                   <div className="space-y-1.5">
                     <Label htmlFor="additionalPhone" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                      Numéro de secours (Optionnel)
+                      {locale === 'ar' ? 'رقم هاتف إضافي (اختياري)' : 'Numéro de secours (Optionnel)'}
                     </Label>
                     <Input
                       id="additionalPhone"
                       type="tel"
-                      placeholder="Second numéro de contact"
+                      placeholder={locale === 'ar' ? "رقم ثانٍ للتواصل" : "Second numéro de contact"}
                       value={additionalPhone}
                       onChange={(e) => setAdditionalPhone(e.target.value)}
-                      className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm"
+                      className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
                   <Label htmlFor="email" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                    Adresse Email (Optionnel)
+                    {locale === 'ar' ? 'البريد الإلكتروني (اختياري)' : 'Adresse Email (Optionnel)'}
                   </Label>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="Pour recevoir votre accusé par email"
+                    placeholder={locale === 'ar' ? "لتلقي نسخة من تفاصيل الطلب" : "Pour recevoir votre accusé par email"}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm"
@@ -271,7 +282,7 @@ export default function CheckoutPage() {
             <div className="space-y-4 pt-4 border-t border-[#1A1A1A]/10">
               <div className="border-b border-[#1A1A1A]/10 pb-3">
                 <h3 className="font-serif text-lg font-bold tracking-tight">
-                  2. Adresse de Livraison (Algérie)
+                  {locale === 'ar' ? '2. عنوان التوصيل (الجزائر 58 ولاية)' : '2. Adresse de Livraison (Algérie)'}
                 </h3>
               </div>
 
@@ -280,7 +291,7 @@ export default function CheckoutPage() {
                   {/* Wilaya Selection */}
                   <div className="space-y-1.5">
                     <Label htmlFor="wilaya" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                      Wilaya *
+                      {t.checkout.wilaya} *
                     </Label>
                     <select
                       id="wilaya"
@@ -299,7 +310,7 @@ export default function CheckoutPage() {
                   {/* Dependent Commune Selection */}
                   <div className="space-y-1.5">
                     <Label htmlFor="commune" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                      Commune *
+                      {t.checkout.commune} *
                     </Label>
                     <select
                       id="commune"
@@ -318,13 +329,13 @@ export default function CheckoutPage() {
 
                 <div className="space-y-1.5">
                   <Label htmlFor="address" className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80">
-                    Adresse Complète & Repère *
+                    {t.checkout.address} *
                   </Label>
                   <Input
                     id="address"
                     type="text"
                     required
-                    placeholder="Quartier, rue, numéro de bâtiment, étage..."
+                    placeholder={locale === 'ar' ? "الحي، الشارع، رقم العمارة، الطابق..." : "Quartier, rue, numéro de bâtiment, étage..."}
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
                     className="h-12 border-[#1A1A1A]/20 focus:border-[#1A1A1A] rounded-none text-sm"
@@ -334,7 +345,7 @@ export default function CheckoutPage() {
                 {/* Delivery Mode Choice */}
                 <div className="space-y-2 pt-2">
                   <Label className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80 block">
-                    Mode d&apos;Expédition
+                    {t.checkout.deliveryMethod}
                   </Label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
@@ -347,10 +358,10 @@ export default function CheckoutPage() {
                       }`}
                     >
                       <span className="font-semibold block text-xs uppercase tracking-wider">
-                        Livraison à Domicile
+                        {t.checkout.domicile}
                       </span>
                       <span className={`text-[11px] block mt-0.5 ${deliveryMethod === "DOMICILE" ? "text-white/80" : "text-[#1A1A1A]/60"}`}>
-                        Remise directe à votre adresse
+                        {locale === 'ar' ? 'توصيل مباشر إلى باب منزلك' : 'Remise directe à votre adresse'}
                       </span>
                     </button>
 
@@ -364,10 +375,10 @@ export default function CheckoutPage() {
                       }`}
                     >
                       <span className="font-semibold block text-xs uppercase tracking-wider">
-                        Point Relais (Stop-Desk)
+                        {t.checkout.stopDesk}
                       </span>
                       <span className={`text-[11px] block mt-0.5 ${deliveryMethod === "STOP_DESK" ? "text-white/80" : "text-[#1A1A1A]/60"}`}>
-                        Réception en agence express
+                        {locale === 'ar' ? 'استلام من مكتب شركة الشحن' : 'Réception en agence express'}
                       </span>
                     </button>
                   </div>
@@ -378,105 +389,104 @@ export default function CheckoutPage() {
 
             {/* Section 3: Payment Guarantee */}
             <div className="p-4 bg-[#F9F9F7] border border-[#1A1A1A]/10 flex items-start gap-3">
-              <CheckCircle2 size={18} className="text-emerald-700 shrink-0 mt-0.5" />
-              <div className="text-xs font-sans text-[#1A1A1A]/80 space-y-1">
-                <span className="font-semibold text-[#1A1A1A] block">
-                  Paiement 100% à la Livraison (Espèces)
+              <ShieldCheck size={20} className="text-[#1A1A1A] shrink-0 mt-0.5" />
+              <div className="text-xs font-sans space-y-1">
+                <span className="font-bold text-[#1A1A1A] block uppercase tracking-wider">
+                  {t.trust.paymentOnDelivery} (Cash on Delivery)
                 </span>
-                <p>
-                  Vous ne payez rien maintenant. Vous réglerez le montant exact auprès du livreur lors de la réception de votre colis.
+                <p className="text-[#1A1A1A]/70 leading-relaxed font-light">
+                  {t.checkout.paymentNotice}
                 </p>
               </div>
             </div>
 
           </div>
 
-          {/* Right: Order Summary & Action (5 cols) */}
+          {/* Right: Order Summary & Confirmation CTA (5 cols) */}
           <div className="lg:col-span-5 bg-white border border-[#1A1A1A]/10 p-6 md:p-8 space-y-6 sticky top-28">
             <h3 className="font-serif text-xl font-bold tracking-tight border-b border-[#1A1A1A]/10 pb-4">
-              Détail de votre Commande
+              {t.checkout.orderSummary}
             </h3>
 
             {/* Items Mini List */}
-            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-1">
+            <div className="divide-y divide-[#1A1A1A]/5 max-h-60 overflow-y-auto pr-1">
               {items.map((item) => (
-                <div key={item.key} className="flex gap-3 items-center justify-between text-xs font-sans border-b border-[#1A1A1A]/5 pb-3">
+                <div key={item.key} className="py-3 flex items-center justify-between gap-3 text-xs font-sans">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="h-14 w-12 relative bg-[#F2F2EF] shrink-0 border border-[#1A1A1A]/10 overflow-hidden">
+                    <div className="h-12 w-10 relative bg-[#F2F2EF] shrink-0 border border-[#1A1A1A]/5 overflow-hidden">
                       <Image
                         src={item.image}
                         alt={item.name}
                         fill
-                        sizes="60px"
+                        sizes="50px"
                         className="object-cover object-center"
                       />
                     </div>
                     <div className="min-w-0">
-                      <h4 className="font-serif font-bold truncate text-[#1A1A1A]">
-                        {item.name}
-                      </h4>
-                      {item.variantName && (
-                        <span className="text-[10px] uppercase text-[#1A1A1A]/60 block">
-                          {item.variantName}
-                        </span>
-                      )}
-                      <span className="text-[11px] text-[#1A1A1A]/60 block">
-                        Qté: {item.quantity} × {item.unitPrice.toLocaleString('fr-FR')} DA
+                      <span className="font-medium text-[#1A1A1A] block truncate">{item.name}</span>
+                      <span className="text-[#1A1A1A]/50 text-[10px] block">
+                        Qté: {item.quantity} {item.variantName ? `• ${item.variantName}` : ''}
                       </span>
                     </div>
                   </div>
-
-                  <span className="font-bold text-[#1A1A1A] shrink-0">
-                    {(item.unitPrice * item.quantity).toLocaleString('fr-FR')} DA
+                  <span className="font-semibold text-[#1A1A1A] shrink-0 font-mono">
+                    {(item.unitPrice * item.quantity).toLocaleString('fr-FR')} {t.common.currencySymbol}
                   </span>
                 </div>
               ))}
             </div>
 
-            {/* Breakdown */}
-            <div className="space-y-2.5 pt-2 border-t border-[#1A1A1A]/10 text-xs font-sans">
-              <div className="flex justify-between text-[#1A1A1A]/80">
-                <span>Sous-total articles</span>
-                <span className="font-semibold">{subtotal.toLocaleString('fr-FR')} DA</span>
+            {/* Calculations Breakdown */}
+            <div className="border-t border-[#1A1A1A]/10 pt-4 space-y-2 text-xs font-sans">
+              <div className="flex justify-between text-[#1A1A1A]/70">
+                <span>{t.cart.subtotal}</span>
+                <span className="font-medium font-mono">{subtotal.toLocaleString('fr-FR')} {t.common.currencySymbol}</span>
               </div>
-              <div className="flex justify-between text-[#1A1A1A]/80">
-                <span>Frais de livraison ({deliveryMethod === "DOMICILE" ? "Domicile" : "Stop-Desk"})</span>
-                <span className="font-semibold">{deliveryFee.toLocaleString('fr-FR')} DA</span>
-              </div>
-              <div className="border-t border-[#1A1A1A]/10 pt-3 flex justify-between items-baseline">
-                <span className="font-serif text-base font-bold">Total à la Réception</span>
-                <span className="font-sans text-2xl font-bold text-[#1A1A1A]">
-                  {grandTotal.toLocaleString('fr-FR')} DA
-                </span>
+              <div className="flex justify-between text-[#1A1A1A]/70">
+                <span>{t.cart.shipping} ({deliveryMethod === 'DOMICILE' ? (locale === 'ar' ? 'منزل' : 'Domicile') : (locale === 'ar' ? 'مكتب' : 'Stop-Desk')})</span>
+                <span className="font-medium font-mono">{deliveryFee.toLocaleString('fr-FR')} {t.common.currencySymbol}</span>
               </div>
             </div>
 
-            {/* Submit Action */}
+            {/* Grand Total */}
+            <div className="border-t border-[#1A1A1A]/10 pt-4 flex justify-between items-baseline">
+              <div>
+                <span className="font-serif text-lg font-bold block">{t.cart.total}</span>
+                <span className="text-[10px] uppercase tracking-wider text-[#1A1A1A]/50 font-sans block">
+                  {t.common.codBadge}
+                </span>
+              </div>
+              <span className="font-sans text-2xl sm:text-3xl font-bold text-[#1A1A1A] font-mono">
+                {grandTotal.toLocaleString('fr-FR')} {t.common.currencySymbol}
+              </span>
+            </div>
+
+            {/* Confirmation CTA */}
             <Button
               type="submit"
               disabled={isSubmitting}
               size="lg"
-              className="w-full h-16 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-3 shadow-xl transition-all"
+              className="w-full h-14 bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 text-xs uppercase tracking-[0.25em] flex items-center justify-center gap-2 shadow-lg font-bold"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 size={18} className="animate-spin" />
-                  <span>Validation en cours...</span>
+                  <Loader2 size={16} className="animate-spin" />
+                  <span>{t.common.loading}</span>
                 </>
               ) : (
-                <span>Confirmer la Commande • COD</span>
+                <span>{t.checkout.placeOrder}</span>
               )}
             </Button>
 
-            {/* Trust Reassurance */}
-            <div className="space-y-2 pt-3 border-t border-[#1A1A1A]/10 text-[11px] font-sans text-[#1A1A1A]/70">
-              <div className="flex items-center gap-2">
-                <ShieldCheck size={14} className="text-[#1A1A1A]" />
-                <span>Validation téléphonique avant expédition.</span>
-              </div>
+            {/* Reassurance */}
+            <div className="space-y-2 pt-2 border-t border-[#1A1A1A]/5 text-[11px] font-sans text-[#1A1A1A]/60">
               <div className="flex items-center gap-2">
                 <Truck size={14} className="text-[#1A1A1A]" />
-                <span>Colis scellé et protégé avec présentation écrin cadeau.</span>
+                <span>{t.trust.wilayasShippingSub}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <ShieldCheck size={14} className="text-[#1A1A1A]" />
+                <span>{t.trust.paymentOnDeliverySub}</span>
               </div>
             </div>
 

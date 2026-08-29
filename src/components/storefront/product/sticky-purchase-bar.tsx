@@ -4,14 +4,16 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Product } from "@/lib/catalog"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n/context"
 import { cn } from "@/lib/utils"
 
 interface StickyPurchaseBarProps {
   product: Product
 }
 
-export function StickyPurchaseBar({ product }: ProductStickyProps) {
+export function StickyPurchaseBar({ product }: StickyPurchaseBarProps) {
   const [isVisible, setIsVisible] = useState(false)
+  const { t, dir } = useI18n()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -27,10 +29,11 @@ export function StickyPurchaseBar({ product }: ProductStickyProps) {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
-  const formattedPrice = `${product.price.toLocaleString('fr-FR')} DA`
+  const formattedPrice = `${product.price.toLocaleString('fr-FR')} ${t.common.currencySymbol}`
 
   return (
     <div
+      dir={dir}
       className={cn(
         "fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#1A1A1A]/10 py-3.5 px-4 md:px-12 transition-transform duration-300 shadow-lg",
         isVisible ? "translate-y-0" : "translate-y-full"
@@ -54,7 +57,7 @@ export function StickyPurchaseBar({ product }: ProductStickyProps) {
               {product.name}
             </h4>
             <span className="font-sans text-xs font-semibold text-[#1A1A1A] tracking-wider block">
-              {formattedPrice} • <span className="text-[#1A1A1A]/60 font-normal">Paiement à la livraison</span>
+              {formattedPrice} • <span className="text-[#1A1A1A]/60 font-normal">{t.common.codBadge}</span>
             </span>
           </div>
         </div>
@@ -63,12 +66,12 @@ export function StickyPurchaseBar({ product }: ProductStickyProps) {
         <div>
           <Button
             size="sm"
-            className="bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 px-6 py-5 text-[11px] uppercase tracking-[0.2em] shadow-md whitespace-nowrap"
+            className="bg-[#1A1A1A] text-white hover:bg-[#1A1A1A]/90 px-6 py-5 text-[11px] uppercase tracking-[0.2em] shadow-md whitespace-nowrap font-bold"
             onClick={() => {
               window.scrollTo({ top: 0, behavior: 'smooth' })
             }}
           >
-            Commander Maintenant
+            {t.common.buyNow}
           </Button>
         </div>
 
@@ -76,5 +79,3 @@ export function StickyPurchaseBar({ product }: ProductStickyProps) {
     </div>
   )
 }
-
-type ProductStickyProps = StickyPurchaseBarProps

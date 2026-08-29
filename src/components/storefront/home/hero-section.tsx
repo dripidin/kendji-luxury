@@ -1,22 +1,26 @@
+'use client'
+
 import Image from "next/image"
 import Link from "next/link"
 import { Container } from "@/components/storefront/layout/container"
 import { Button } from "@/components/ui/button"
 import { getHeroProduct, getProductBySlug, BACKGROUND_ASSETS } from "@/lib/catalog"
 import { HeroSectionContent } from "@/lib/cms"
+import { useI18n } from "@/lib/i18n/context"
 
 interface HeroSectionProps {
   content?: HeroSectionContent
 }
 
 export function HeroSection({ content }: HeroSectionProps) {
+  const { t } = useI18n()
   const defaultProduct = getHeroProduct()
   const heroProduct = (content?.featured_product_slug ? getProductBySlug(content.featured_product_slug) : null) || defaultProduct
   const bgPath = content?.background_media || BACKGROUND_ASSETS['KJ-BG-02'].path
 
-  const headline = content?.headline || "The Architecture of Intimacy."
-  const subheadline = content?.subheadline || "Modern monochrome luxury designed with architectural precision. Elevating curated statement jewelry into timeless personal emblems."
-  const primaryCtaLabel = content?.primary_cta_label || "Discover the Collection"
+  const headline = content?.headline || t.hero.headline
+  const subheadline = content?.subheadline || t.hero.subheadline
+  const primaryCtaLabel = content?.primary_cta_label || t.hero.ctaPrimary
   const primaryCtaUrl = content?.primary_cta_url || "/shop"
 
   return (
@@ -44,7 +48,7 @@ export function HeroSection({ content }: HeroSectionProps) {
             <div className="inline-flex items-center gap-3">
               <span className="h-px w-8 bg-white/60" />
               <span className="text-xs uppercase tracking-[0.3em] text-white/80 font-sans">
-                KenDji Luxury &bull; High Jewelry
+                {t.hero.badge}
               </span>
             </div>
 
@@ -60,7 +64,7 @@ export function HeroSection({ content }: HeroSectionProps) {
               <Link href={primaryCtaUrl}>
                 <Button 
                   size="lg" 
-                  className="w-full sm:w-auto px-10 py-6 text-xs uppercase tracking-[0.25em] bg-white text-[#1A1A1A] hover:bg-[#F9F9F7] transition-all duration-300"
+                  className="w-full sm:w-auto px-10 py-6 text-xs uppercase tracking-[0.25em] bg-white text-[#1A1A1A] hover:bg-[#F9F9F7] transition-all duration-300 font-bold"
                 >
                   {primaryCtaLabel}
                 </Button>
@@ -71,7 +75,7 @@ export function HeroSection({ content }: HeroSectionProps) {
                   size="lg" 
                   className="w-full sm:w-auto px-8 py-6 text-xs uppercase tracking-[0.25em] border-white/30 text-white hover:bg-white/10 hover:border-white transition-all duration-300"
                 >
-                  Explore Worlds
+                  {t.hero.ctaSecondary}
                 </Button>
               </Link>
             </div>
@@ -93,12 +97,12 @@ export function HeroSection({ content }: HeroSectionProps) {
                 />
               </div>
               <div className="space-y-1 text-white">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">Signature Selection</p>
+                <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">{t.hero.signatureSelection}</p>
                 <h4 className="font-serif text-sm line-clamp-1 group-hover:text-white/80 transition-colors">
                   {heroProduct.name}
                 </h4>
                 <p className="text-xs font-sans tracking-widest text-white/90">
-                  {heroProduct.price.toLocaleString('fr-FR')} DA
+                  {heroProduct.price.toLocaleString('fr-FR')} {t.common.currencySymbol}
                 </p>
               </div>
             </Link>

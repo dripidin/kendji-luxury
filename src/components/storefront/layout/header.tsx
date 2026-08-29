@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { Search, ShoppingBag, Menu, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/lib/cart/cart-context"
+import { useI18n } from "@/lib/i18n/context"
 import { LanguageSwitcher } from "@/components/storefront/layout/language-switcher"
 
 export function StorefrontHeader() {
@@ -13,6 +14,7 @@ export function StorefrontHeader() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const pathname = usePathname()
   const { openCart, itemCount } = useCart()
+  const { t } = useI18n()
 
   const isHome = pathname === "/"
 
@@ -55,10 +57,10 @@ export function StorefrontHeader() {
         </button>
 
         {/* Desktop Nav Left */}
-        <nav className="hidden lg:flex items-center gap-8 text-sm uppercase tracking-widest">
-          <Link href="/shop" className="hover:opacity-70 transition-opacity">Shop</Link>
-          <Link href="/category" className="hover:opacity-70 transition-opacity">Categories</Link>
-          <Link href="/collections" className="hover:opacity-70 transition-opacity">Collections</Link>
+        <nav className="hidden lg:flex items-center gap-8 text-sm uppercase tracking-widest font-medium">
+          <Link href="/shop" className="hover:opacity-70 transition-opacity">{t.nav.shop}</Link>
+          <Link href="/category" className="hover:opacity-70 transition-opacity">{t.nav.categories}</Link>
+          <Link href="/collections" className="hover:opacity-70 transition-opacity">{t.nav.collections}</Link>
         </nav>
 
         {/* Logo */}
@@ -75,14 +77,14 @@ export function StorefrontHeader() {
         {/* Desktop/Mobile Nav Right (Actions) */}
         <div className="flex items-center gap-3 md:gap-5">
           <LanguageSwitcher />
-          <Link href="/shop" aria-label="Search" className="p-2 -mr-2 hover:opacity-70 transition-opacity">
+          <Link href="/shop" aria-label={t.nav.search} className="p-2 hover:opacity-70 transition-opacity">
             <Search size={20} strokeWidth={1.5} />
           </Link>
           <button 
             type="button"
             onClick={openCart}
-            aria-label={`Cart with ${itemCount} items`} 
-            className="p-2 -mr-2 flex items-center gap-2 hover:opacity-70 transition-opacity"
+            aria-label={`${t.nav.cart} (${itemCount})`} 
+            className="p-2 flex items-center gap-2 hover:opacity-70 transition-opacity"
           >
             <div className="relative">
               <ShoppingBag size={20} strokeWidth={1.5} />
@@ -93,7 +95,7 @@ export function StorefrontHeader() {
               )}
             </div>
             <span className="hidden md:inline-block text-xs uppercase tracking-widest mt-0.5">
-              Cart ({itemCount})
+              {t.nav.cart} ({itemCount})
             </span>
           </button>
         </div>
@@ -102,10 +104,10 @@ export function StorefrontHeader() {
 
       {/* Mobile Menu Dropdown */}
       {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-20 left-0 w-full h-[calc(100vh-5rem)] bg-[#F9F9F7] text-[#1A1A1A] p-6 flex flex-col gap-8 text-lg uppercase tracking-widest">
-          <Link href="/shop" className="py-2 border-b border-[#1A1A1A]/10">Shop All</Link>
-          <Link href="/category" className="py-2 border-b border-[#1A1A1A]/10">Categories</Link>
-          <Link href="/collections" className="py-2 border-b border-[#1A1A1A]/10">Collections</Link>
+        <div className="lg:hidden absolute top-20 left-0 w-full h-[calc(100vh-5rem)] bg-[#F9F9F7] text-[#1A1A1A] p-6 flex flex-col gap-6 text-lg uppercase tracking-widest">
+          <Link href="/shop" className="py-3 border-b border-[#1A1A1A]/10">{t.nav.shop}</Link>
+          <Link href="/category" className="py-3 border-b border-[#1A1A1A]/10">{t.nav.categories}</Link>
+          <Link href="/collections" className="py-3 border-b border-[#1A1A1A]/10">{t.nav.collections}</Link>
         </div>
       )}
     </header>

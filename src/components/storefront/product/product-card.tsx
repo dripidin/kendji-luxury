@@ -1,7 +1,10 @@
+'use client'
+
 import Link from "next/link"
 import Image from "next/image"
 import { cn } from "@/lib/utils"
 import { Product } from "@/lib/catalog"
+import { useI18n } from "@/lib/i18n/context"
 
 interface ProductCardProps {
   product: Product | {
@@ -19,14 +22,16 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product, className, priority = false }: ProductCardProps) {
+  const { t } = useI18n()
+
   const imageSrc = ('coverImage' in product && product.coverImage) 
     ? product.coverImage 
     : ('image' in product && product.image) 
       ? product.image 
       : null
 
-  // Format price in Algerian Dinar (DA / DZD)
-  const formattedPrice = `${product.price.toLocaleString('fr-FR')} DA`
+  // Format price in Algerian Dinar
+  const formattedPrice = `${product.price.toLocaleString('fr-FR')} ${t.common.currencySymbol}`
 
   return (
     <Link 
@@ -46,14 +51,14 @@ export function ProductCard({ product, className, priority = false }: ProductCar
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-charcoal/20 uppercase tracking-widest text-xs font-sans">
-            Image Unavailable
+            {t.common.brandName}
           </div>
         )}
         
         {/* Subtle Luxury Corner Tag / Accent */}
         <div className="absolute bottom-3 left-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <span className="bg-[#1A1A1A]/90 text-white text-[10px] uppercase tracking-widest px-2.5 py-1 backdrop-blur-sm">
-            View Details
+            {t.catalog.viewDetails}
           </span>
         </div>
       </div>
