@@ -47,7 +47,6 @@ Thumbs.db
 *.code-workspace
 .agents/
 
-# Raw Supplier Source Folders
-Kendji Boutique/
-
+# Supabase CLI temp files
+supabase/.temp/
 .vercel
