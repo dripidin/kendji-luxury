@@ -120,9 +120,94 @@ export async function fetchStorefrontProducts(options?: {
   return applySorting(products, sort)
 }
 
+interface DbProductRecord {
+  id: string
+  sku?: string | null
+  slug: string
+  name: string
+  base_price: number | string
+  currency?: string | null
+  description?: string | null
+  short_description?: string | null
+  is_featured?: boolean | null
+  categories?: { name: string; slug: string } | null
+  product_media?: Array<{ url: string; role: string; display_order?: number }>
+  variants?: Array<{ id: string; label: string; sku?: string; is_available?: boolean }>
+  product_collections?: Array<{ collections?: { name: string; slug: string } }>
+  metadata?: {
+    metallicFinish?: string
+    stonesOrInserts?: string
+    designCharacteristics?: string
+    piecesIncluded?: string
+    collection?: string
+    collectionSlug?: string
+    variant_images?: Record<string, string>
+  }
+}
+
 /**
- * Fetch a single product by slug from Supabase with live gallery imagery and live variants.
+ * Helper to map DB product record to StorefrontProduct
  */
+export function mapDbItemToStorefrontProduct(item: DbProductRecord): StorefrontProduct {
+  const sortedMedia = (item.product_media || []).sort(
+    (a: { display_order?: number; role: string }, b: { display_order?: number; role: string }) => {
+      if (a.role === 'COVER') return -1
+      if (b.role === 'COVER') return 1
+      return (a.display_order || 0) - (b.display_order || 0)
+    }
+  )
+
+  const coverImage =
+    sortedMedia.find((m: { role: string }) => m.role === 'COVER')?.url ||
+    sortedMedia[0]?.url ||
+    '/products/product-1/white.jpg'
+
+  const images = sortedMedia.length > 0 ? sortedMedia.map((m: { url: string }) => m.url) : [coverImage]
+
+  const linkedCollections = (item.product_collections || [])
+    .map((pc: { collections?: { name: string; slug: string } }) => pc.collections)
+    .filter(Boolean)
+
+  const collectionName = linkedCollections[0]?.name || item.metadata?.collection || 'Signature Motifs'
+  const itemCollectionSlug = linkedCollections[0]?.slug || item.metadata?.collectionSlug || 'signature-motifs'
+
+  const rawVariants = item.variants || []
+  const variantImagesMap = item.metadata?.variant_images || {}
+  const variants = rawVariants
+    .filter((v: { is_available?: boolean }) => v.is_available !== false)
+    .map((v: { id: string; label: string; sku?: string }) => {
+      const specificImg = (v.label && variantImagesMap[v.label]) || (v.sku && variantImagesMap[v.sku]) || coverImage
+      return {
+        id: v.id,
+        name: v.label,
+        image: specificImg
+      }
+    })
+
+  return {
+    id: item.sku || item.id,
+    dbId: item.id,
+    slug: item.slug,
+    folderSlug: item.slug,
+    name: item.name,
+    category: item.categories?.name || 'Joaillerie',
+    categorySlug: item.categories?.slug || 'sets',
+    collection: collectionName,
+    collectionSlug: itemCollectionSlug,
+    price: Number(item.base_price),
+    currency: item.currency || 'DZD',
+    images,
+    coverImage,
+    description: item.description || item.short_description || '',
+    metallicFinish: item.metadata?.metallicFinish || 'Finition dorée haute joaillerie',
+    stonesOrInserts: item.metadata?.stonesOrInserts || 'Pierres et inserts précieux',
+    designCharacteristics: item.metadata?.designCharacteristics || 'Création artisanale de la maison KenDji',
+    piecesIncluded: item.metadata?.piecesIncluded || '1 Pièce',
+    isFeatured: Boolean(item.is_featured),
+    variants: variants.length > 0 ? variants : undefined
+  }
+}
+
 export async function fetchStorefrontProductBySlug(slug: string): Promise<StorefrontProduct | null> {
   try {
     const supabase = createAdminClient()
@@ -133,63 +218,7 @@ export async function fetchStorefrontProductBySlug(slug: string): Promise<Storef
       .maybeSingle()
 
     if (!error && item) {
-      const sortedMedia = (item.product_media || []).sort(
-        (a: { display_order: number; role: string }, b: { display_order: number; role: string }) => {
-          if (a.role === 'COVER') return -1
-          if (b.role === 'COVER') return 1
-          return (a.display_order || 0) - (b.display_order || 0)
-        }
-      )
-
-      const coverImage =
-        sortedMedia.find((m: { role: string }) => m.role === 'COVER')?.url ||
-        sortedMedia[0]?.url ||
-        '/products/product-1/white.jpg'
-
-      const images = sortedMedia.length > 0 ? sortedMedia.map((m: { url: string }) => m.url) : [coverImage]
-
-      const linkedCollections = (item.product_collections || [])
-        .map((pc: { collections?: { name: string; slug: string } }) => pc.collections)
-        .filter(Boolean)
-
-      const collectionName = linkedCollections[0]?.name || item.metadata?.collection || 'Signature Motifs'
-      const itemCollectionSlug = linkedCollections[0]?.slug || item.metadata?.collectionSlug || 'signature-motifs'
-
-      const rawVariants = item.variants || []
-      const variantImagesMap = item.metadata?.variant_images || {}
-      const variants = rawVariants
-        .filter((v: { is_available?: boolean }) => v.is_available !== false)
-        .map((v: { id: string; label: string; sku?: string }) => {
-          const specificImg = (v.label && variantImagesMap[v.label]) || (v.sku && variantImagesMap[v.sku]) || coverImage
-          return {
-            id: v.id,
-            name: v.label,
-            image: specificImg
-          }
-        })
-
-      return {
-        id: item.sku || item.id,
-        dbId: item.id,
-        slug: item.slug,
-        folderSlug: item.slug,
-        name: item.name,
-        category: item.categories?.name || 'Joaillerie',
-        categorySlug: item.categories?.slug || 'sets',
-        collection: collectionName,
-        collectionSlug: itemCollectionSlug,
-        price: Number(item.base_price),
-        currency: item.currency || 'DZD',
-        images,
-        coverImage,
-        description: item.description || item.short_description || '',
-        metallicFinish: item.metadata?.metallicFinish || 'Finition dorée haute joaillerie',
-        stonesOrInserts: item.metadata?.stonesOrInserts || 'Pierres et inserts précieux',
-        designCharacteristics: item.metadata?.designCharacteristics || 'Création artisanale de la maison KenDji',
-        piecesIncluded: item.metadata?.piecesIncluded || '1 Pièce',
-        isFeatured: item.is_featured || false,
-        variants: variants.length > 0 ? variants : undefined
-      }
+      return mapDbItemToStorefrontProduct(item)
     }
   } catch (e) {
     console.warn('Supabase product slug query fallback to static:', e)
@@ -200,7 +229,52 @@ export async function fetchStorefrontProductBySlug(slug: string): Promise<Storef
 }
 
 /**
- * Fetch all featured products from Supabase (is_featured = true) for Homepage "Créations Emblématiques".
+ * Dynamically resolves the Hero Product based on CMS configuration or top published product.
+ */
+export async function fetchHeroStorefrontProduct(heroProductSlugOrId?: string): Promise<StorefrontProduct | null> {
+  try {
+    const supabase = createAdminClient()
+
+    // 1. If explicit slug or ID configured in CMS
+    if (heroProductSlugOrId && heroProductSlugOrId.trim() !== '') {
+      const clean = heroProductSlugOrId.trim()
+      const { data: explicitProduct, error: explicitError } = await supabase
+        .from('products')
+        .select('*, categories(id, name, slug), product_media(*), variants(*), product_collections(collections(id, name, slug))')
+        .eq('status', 'PUBLISHED')
+        .or(`slug.eq.${clean},id.eq.${clean}`)
+        .maybeSingle()
+
+      if (!explicitError && explicitProduct) {
+        return mapDbItemToStorefrontProduct(explicitProduct)
+      }
+    }
+
+    // 2. Safe deterministic fallback: highest-priority published product with is_featured = true or latest published
+    const { data: topFeatured, error: topError } = await supabase
+      .from('products')
+      .select('*, categories(id, name, slug), product_media(*), variants(*), product_collections(collections(id, name, slug))')
+      .eq('status', 'PUBLISHED')
+      .order('is_featured', { ascending: false })
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (!topError && topFeatured) {
+      return mapDbItemToStorefrontProduct(topFeatured)
+    }
+  } catch (e) {
+    console.warn('Supabase fetchHeroStorefrontProduct error:', e)
+  }
+
+  // Final fallback to static catalog
+  const fallback = getAllProducts()[0]
+  return fallback ? (fallback as StorefrontProduct) : null
+}
+
+/**
+ * Fetch all featured products from Supabase (is_featured = true and status = 'PUBLISHED')
+ * for Homepage "Créations Emblématiques".
  */
 export async function fetchFeaturedStorefrontProducts(limit: number = 8): Promise<StorefrontProduct[]> {
   try {
@@ -213,64 +287,14 @@ export async function fetchFeaturedStorefrontProducts(limit: number = 8): Promis
       .order('updated_at', { ascending: false })
       .limit(limit)
 
-    if (!error && data && data.length > 0) {
-      return data.map(item => {
-        const sortedMedia = (item.product_media || []).sort(
-          (a: { display_order: number; role: string }, b: { display_order: number; role: string }) => {
-            if (a.role === 'COVER') return -1
-            if (b.role === 'COVER') return 1
-            return (a.display_order || 0) - (b.display_order || 0)
-          }
-        )
-
-        const coverImage =
-          sortedMedia.find((m: { role: string }) => m.role === 'COVER')?.url ||
-          sortedMedia[0]?.url ||
-          '/products/product-1/white.jpg'
-
-        const images = sortedMedia.length > 0 ? sortedMedia.map((m: { url: string }) => m.url) : [coverImage]
-
-        const linkedCollections = (item.product_collections || [])
-          .map((pc: { collections?: { name: string; slug: string } }) => pc.collections)
-          .filter(Boolean)
-
-        const collectionName = linkedCollections[0]?.name || item.metadata?.collection || 'Signature Motifs'
-        const itemCollectionSlug = linkedCollections[0]?.slug || item.metadata?.collectionSlug || 'signature-motifs'
-
-        return {
-          id: item.sku || item.id,
-          dbId: item.id,
-          slug: item.slug,
-          folderSlug: item.slug,
-          name: item.name,
-          category: item.categories?.name || 'Joaillerie',
-          categorySlug: item.categories?.slug || 'sets',
-          collection: collectionName,
-          collectionSlug: itemCollectionSlug,
-          price: Number(item.base_price),
-          currency: item.currency || 'DZD',
-          images,
-          coverImage,
-          description: item.description || item.short_description || '',
-          metallicFinish: item.metadata?.metallicFinish,
-          stonesOrInserts: item.metadata?.stonesOrInserts,
-          designCharacteristics: item.metadata?.designCharacteristics,
-          piecesIncluded: item.metadata?.piecesIncluded,
-          isFeatured: true,
-          variants: (item.variants || []).map((v: { id: string; label: string }) => ({
-            id: v.id,
-            name: v.label,
-            image: coverImage
-          }))
-        }
-      })
+    if (!error && Array.isArray(data)) {
+      return data.map(item => mapDbItemToStorefrontProduct(item))
     }
   } catch (e) {
-    console.warn('Supabase featured products query fallback to static catalog:', e)
+    console.warn('Supabase featured products query error:', e)
   }
 
-  // Fallback to static catalog projection
-  return getAllProducts().filter(p => p.isFeatured)
+  return []
 }
 
 /**

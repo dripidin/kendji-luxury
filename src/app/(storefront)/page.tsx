@@ -7,7 +7,7 @@ import { EditorialMoment } from "@/components/storefront/home/editorial-moment"
 import { TrustSection } from "@/components/storefront/home/trust-section"
 import { FinalCTA } from "@/components/storefront/home/final-cta"
 import { getHomepageContent } from "@/lib/cms"
-import { fetchFeaturedStorefrontProducts, fetchStorefrontProductBySlug } from "@/lib/storefront-catalog"
+import { fetchFeaturedStorefrontProducts, fetchHeroStorefrontProduct } from "@/lib/storefront-catalog"
 
 export const dynamic = "force-dynamic"
 
@@ -19,23 +19,22 @@ export const metadata = {
 export default async function HomePage() {
   const content = await getHomepageContent()
 
-  // Fetch featured products dynamically from Supabase
-  let featuredProducts: any[] = []
-  if (content.featured_products?.product_slugs && content.featured_products.product_slugs.length > 0) {
-    const fetched = await Promise.all(
-      content.featured_products.product_slugs.map(slug => fetchStorefrontProductBySlug(slug))
-    )
-    featuredProducts = fetched.filter(Boolean)
-  }
+  // 1. Resolve Hero Product dynamically from CMS configuration or top published product
+  const heroProductSlug = content.hero?.featured_product_slug
+  const heroProduct = await fetchHeroStorefrontProduct(heroProductSlug)
 
-  if (featuredProducts.length === 0) {
-    featuredProducts = await fetchFeaturedStorefrontProducts(8)
-  }
+  // 2. Resolve Featured Products dynamically from authoritative database (is_featured = true & status = 'PUBLISHED')
+  const allFeatured = await fetchFeaturedStorefrontProducts(8)
+
+  // Deduplication: If the hero product is also featured, exclude it from FeaturedPieces when other items exist
+  const featuredProducts = (allFeatured.length > 1 && heroProduct)
+    ? allFeatured.filter(p => p.slug !== heroProduct.slug && p.id !== heroProduct.id)
+    : allFeatured
 
   return (
     <div className="flex flex-col w-full">
       {/* 1. Hero / Brand Entry */}
-      <HeroSection content={content.hero} />
+      <HeroSection content={content.hero} heroProduct={heroProduct} />
 
       {/* 2. Curated Collection Introduction */}
       <CollectionIntro />

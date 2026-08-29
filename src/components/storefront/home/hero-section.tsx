@@ -4,18 +4,18 @@ import Image from "next/image"
 import Link from "next/link"
 import { Container } from "@/components/storefront/layout/container"
 import { Button } from "@/components/ui/button"
-import { getHeroProduct, getProductBySlug, BACKGROUND_ASSETS } from "@/lib/catalog"
+import { Product, BACKGROUND_ASSETS } from "@/lib/catalog"
 import { HeroSectionContent } from "@/lib/cms"
+import { StorefrontProduct } from "@/lib/storefront-catalog"
 import { useI18n } from "@/lib/i18n/context"
 
 interface HeroSectionProps {
   content?: HeroSectionContent
+  heroProduct?: Product | StorefrontProduct | null
 }
 
-export function HeroSection({ content }: HeroSectionProps) {
+export function HeroSection({ content, heroProduct }: HeroSectionProps) {
   const { t } = useI18n()
-  const defaultProduct = getHeroProduct()
-  const heroProduct = (content?.featured_product_slug ? getProductBySlug(content.featured_product_slug) : null) || defaultProduct
   const bgPath = content?.background_media || BACKGROUND_ASSETS['KJ-BG-02'].path
 
   const headline = content?.headline || t.hero.headline
@@ -81,32 +81,34 @@ export function HeroSection({ content }: HeroSectionProps) {
             </div>
           </div>
 
-          {/* Hero Accent Floating Card */}
-          <div className="lg:col-span-4 lg:justify-self-end">
-            <Link 
-              href={`/product/${heroProduct.slug}`}
-              className="group block p-4 bg-white/10 backdrop-blur-md border border-white/20 hover:border-white/40 transition-all duration-500 max-w-xs"
-            >
-              <div className="aspect-square relative overflow-hidden bg-white/5 mb-3">
-                <Image
-                  src={heroProduct.coverImage}
-                  alt={heroProduct.name}
-                  fill
-                  sizes="300px"
-                  className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
-                />
-              </div>
-              <div className="space-y-1 text-white">
-                <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">{t.hero.signatureSelection}</p>
-                <h4 className="font-serif text-sm line-clamp-1 group-hover:text-white/80 transition-colors">
-                  {heroProduct.name}
-                </h4>
-                <p className="text-xs font-sans tracking-widest text-white/90">
-                  {heroProduct.price.toLocaleString('fr-FR')} {t.common.currencySymbol}
-                </p>
-              </div>
-            </Link>
-          </div>
+          {/* Hero Accent Floating Card (Dynamically rendered if a hero product exists) */}
+          {heroProduct && (
+            <div className="lg:col-span-4 lg:justify-self-end">
+              <Link 
+                href={`/product/${heroProduct.slug}`}
+                className="group block p-4 bg-white/10 backdrop-blur-md border border-white/20 hover:border-white/40 transition-all duration-500 max-w-xs"
+              >
+                <div className="aspect-square relative overflow-hidden bg-white/5 mb-3">
+                  <Image
+                    src={heroProduct.coverImage}
+                    alt={heroProduct.name}
+                    fill
+                    sizes="300px"
+                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                  />
+                </div>
+                <div className="space-y-1 text-white">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">{t.hero.signatureSelection}</p>
+                  <h4 className="font-serif text-sm line-clamp-1 group-hover:text-white/80 transition-colors">
+                    {heroProduct.name}
+                  </h4>
+                  <p className="text-xs font-sans tracking-widest text-white/90">
+                    {Number(heroProduct.price).toLocaleString('fr-FR')} {t.common.currencySymbol}
+                  </p>
+                </div>
+              </Link>
+            </div>
+          )}
 
         </div>
       </Container>

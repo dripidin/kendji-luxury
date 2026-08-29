@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import Image from 'next/image'
 import { HomepageContent } from '@/lib/cms'
 import { saveHomepageContentAction } from '@/app/admin/actions/cms'
@@ -142,8 +143,24 @@ export function ContentManager({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="hero-product">Produit Mis en Avant</Label>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="hero-product">Bijou Signature en Vedette (Hero Product)</Label>
+                  {content.hero.featured_product_slug && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setContent({
+                          ...content,
+                          hero: { ...content.hero, featured_product_slug: '' }
+                        })
+                      }
+                      className="text-[11px] text-red-600 hover:text-red-800 underline font-medium"
+                    >
+                      Effacer la sélection (Mode Automatique)
+                    </button>
+                  )}
+                </div>
                 <select
                   id="hero-product"
                   value={content.hero.featured_product_slug || ''}
@@ -155,13 +172,47 @@ export function ContentManager({
                   }
                   className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm"
                 >
-                  <option value="">Sélectionner un bijou...</option>
+                  <option value="">Sélection automatique (Pièce vedette prioritaire)</option>
                   {products.map(p => (
                     <option key={p.slug} value={p.slug}>
-                      {p.name} ({p.price.toLocaleString('fr-FR')} DA)
+                      {p.name} ({Number(p.price).toLocaleString('fr-FR')} DA)
                     </option>
                   ))}
                 </select>
+
+                {/* Selected Product Live Preview Card */}
+                {(() => {
+                  const selectedProd = products.find(p => p.slug === content.hero.featured_product_slug)
+                  if (!selectedProd) return null
+                  return (
+                    <div className="flex items-center gap-4 p-3 rounded-lg border border-gray-200 bg-gray-50/80 mt-2">
+                      <div className="relative h-14 w-14 rounded-md overflow-hidden bg-gray-200 flex-shrink-0 border border-gray-300">
+                        <Image
+                          src={selectedProd.coverImage}
+                          alt={selectedProd.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-semibold text-gray-900 truncate">
+                            {selectedProd.name}
+                          </span>
+                          <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
+                            Actif Hero
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-gray-500 font-mono">
+                          SKU: {selectedProd.id} &bull; Catégorie: {selectedProd.category}
+                        </p>
+                        <p className="text-xs font-mono font-bold text-gray-900">
+                          {Number(selectedProd.price).toLocaleString('fr-FR')} DA
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })()}
               </div>
             </div>
 
@@ -408,33 +459,42 @@ export function ContentManager({
 
           <Card>
             <CardHeader>
-              <CardTitle>Sélection de Pièces Vedettes (4 à 8 pièces)</CardTitle>
-              <CardDescription>
-                Sélectionnez les bijoux qui apparaissent dans la grille Signature Pieces de l&apos;accueil.
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Pièces Vedettes de la Page d&apos;Accueil</CardTitle>
+                  <CardDescription className="mt-1">
+                    La section « Créations Emblématiques » affiche dynamiquement tous les bijoux publiés marqués <strong>« Vedette Accueil »</strong> (is_featured = true) dans le catalogue.
+                  </CardDescription>
+                </div>
+                <Link
+                  href="/admin/products"
+                  className="text-xs uppercase tracking-wider font-semibold px-3 py-1.5 rounded border border-gray-300 hover:border-gray-900 transition-colors"
+                >
+                  Gérer dans le Catalogue &rarr;
+                </Link>
+              </div>
             </CardHeader>
             <CardContent>
+              <div className="bg-amber-50/70 border border-amber-200/80 rounded-lg p-4 mb-4 text-xs text-amber-900 space-y-1">
+                <p className="font-semibold flex items-center gap-1.5">
+                  <Sparkles className="h-4 w-4 text-amber-600" />
+                  Synchronisation Directe avec le Catalogue
+                </p>
+                <p>
+                  Vous pouvez activer ou désactiver la mise en vedette de n&apos;importe quel bijou d&apos;un simple clic sur l&apos;étoile dans la liste des <Link href="/admin/products" className="underline font-medium">Produits</Link> ou dans son formulaire d&apos;édition.
+                </p>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-96 overflow-y-auto p-1">
                 {products.map(prod => {
-                  const isSelected = content.featured_products.product_slugs.includes(prod.slug)
+                  const isSelected = prod.isFeatured || (content.featured_products?.product_slugs || []).includes(prod.slug)
                   return (
-                    <button
+                    <div
                       key={prod.slug}
-                      type="button"
-                      onClick={() => {
-                        const current = content.featured_products.product_slugs
-                        const next = isSelected
-                          ? current.filter(s => s !== prod.slug)
-                          : [...current, prod.slug]
-                        setContent({
-                          ...content,
-                          featured_products: { product_slugs: next }
-                        })
-                      }}
                       className={`flex items-center gap-3 p-3 rounded-lg border text-left transition-all ${
                         isSelected
-                          ? 'border-gray-900 bg-gray-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-amber-400 bg-amber-50/40'
+                          : 'border-gray-200 opacity-70'
                       }`}
                     >
                       <div className="relative h-12 w-12 rounded overflow-hidden bg-gray-100 flex-shrink-0">
@@ -447,16 +507,20 @@ export function ContentManager({
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium text-gray-900 truncate">{prod.name}</p>
-                        <p className="text-[11px] text-gray-500">{prod.price.toLocaleString('fr-FR')} DA</p>
+                        <p className="text-[11px] text-gray-500">{Number(prod.price).toLocaleString('fr-FR')} DA</p>
                       </div>
-                      <div
-                        className={`h-4 w-4 rounded-full border flex items-center justify-center ${
-                          isSelected ? 'bg-gray-900 border-gray-900 text-white' : 'border-gray-300'
-                        }`}
-                      >
-                        {isSelected && <Check className="h-2.5 w-2.5" />}
+                      <div className="text-right">
+                        {isSelected ? (
+                          <span className="text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-300 px-2 py-0.5 rounded-full">
+                            ★ En Vedette
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                            Non
+                          </span>
+                        )}
                       </div>
-                    </button>
+                    </div>
                   )
                 })}
               </div>

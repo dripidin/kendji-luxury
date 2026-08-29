@@ -16,17 +16,34 @@ export async function saveHomepageContentAction(content: HomepageContent) {
   try {
     const supabase = createAdminClient()
 
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        brand_name: 'KenDji Luxury',
-        homepage_content: content,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    // Check if row 1 exists
+    const { data: existing } = await supabase.from('site_settings').select('id').eq('id', 1).maybeSingle()
 
-    if (error) {
-      return { success: false, error: error.message }
+    if (existing) {
+      const { error } = await supabase
+        .from('site_settings')
+        .update({
+          homepage_content: content,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', 1)
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
+    } else {
+      const { error } = await supabase
+        .from('site_settings')
+        .insert({
+          id: 1,
+          brand_name: 'KenDji Luxury',
+          homepage_content: content,
+          updated_at: new Date().toISOString()
+        })
+
+      if (error) {
+        return { success: false, error: error.message }
+      }
     }
 
     safeRevalidate('/')

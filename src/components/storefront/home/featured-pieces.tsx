@@ -4,25 +4,19 @@ import Link from "next/link"
 import { Container, Section } from "@/components/storefront/layout/container"
 import { ProductCard } from "@/components/storefront/product/product-card"
 import { Button } from "@/components/ui/button"
-import { Product, getFeaturedProducts, getProductBySlug } from "@/lib/catalog"
+import { Product } from "@/lib/catalog"
+import { StorefrontProduct } from "@/lib/storefront-catalog"
 import { useI18n } from "@/lib/i18n/context"
 
 interface FeaturedPiecesProps {
-  products?: Product[]
-  productSlugs?: string[]
+  products?: (Product | StorefrontProduct)[]
 }
 
-export function FeaturedPieces({ products: initialProducts, productSlugs }: FeaturedPiecesProps) {
+export function FeaturedPieces({ products = [] }: FeaturedPiecesProps) {
   const { t } = useI18n()
 
-  let products = (initialProducts && initialProducts.length > 0)
-    ? initialProducts
-    : (productSlugs && productSlugs.length > 0)
-    ? productSlugs.map(slug => getProductBySlug(slug)).filter(Boolean) as Product[]
-    : getFeaturedProducts().slice(0, 4)
-
-  if (products.length === 0) {
-    products = getFeaturedProducts().slice(0, 4)
+  if (!products || products.length === 0) {
+    return null
   }
 
   return (
@@ -56,8 +50,8 @@ export function FeaturedPieces({ products: initialProducts, productSlugs }: Feat
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6 lg:gap-8">
           {products.map((product, idx) => (
             <ProductCard 
-              key={product!.id} 
-              product={product!} 
+              key={product.id} 
+              product={product as Product} 
               priority={idx < 2}
             />
           ))}

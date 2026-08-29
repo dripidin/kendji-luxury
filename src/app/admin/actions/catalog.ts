@@ -243,6 +243,33 @@ export async function updateProduct(id: string, data: ProductFormValues) {
 }
 
 /**
+ * 1-Click Toggle for Featured on Homepage
+ */
+export async function toggleProductFeaturedAction(id: string, is_featured: boolean) {
+  try {
+    const supabase = createAdminClient()
+    const { error } = await supabase
+      .from('products')
+      .update({
+        is_featured,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+
+    if (error) return { success: false, error: error.message }
+
+    safeRevalidatePath('/admin/products')
+    safeRevalidatePath('/admin/content')
+    safeRevalidatePath('/')
+    safeRevalidatePath('/shop')
+    return { success: true }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Erreur modification mise en avant'
+    return { success: false, error: msg }
+  }
+}
+
+/**
  * Safe Delete or Archive Product
  * If product is referenced in historical order items, safely archives it instead of breaking historical records.
  */

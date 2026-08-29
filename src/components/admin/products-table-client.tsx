@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Input } from '@/components/ui/input'
 import { TableRowActions } from '@/components/admin/table-row-actions'
-import { deleteOrArchiveProduct, updateProduct } from '@/app/admin/actions/catalog'
-import { Search, Package } from 'lucide-react'
+import { deleteOrArchiveProduct, toggleProductFeaturedAction } from '@/app/admin/actions/catalog'
+import { Search, Package, Star, Loader2 } from 'lucide-react'
 
 interface ProductItem {
   id: string
@@ -27,19 +27,48 @@ const STATUS_LABELS: Record<string, { label: string; classes: string }> = {
 }
 
 export function ProductsTableClient({ initialProducts }: { initialProducts: ProductItem[] }) {
+  const router = useRouter()
+  const [featuredOverrides, setFeaturedOverrides] = useState<Record<string, boolean>>({})
   const [searchTerm, setSearchTerm] = useState('')
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+
+  const handleToggleFeatured = async (product: ProductItem) => {
+    const isCurrentlyFeatured = product.id in featuredOverrides ? featuredOverrides[product.id] : product.is_featured
+    const nextVal = !isCurrentlyFeatured
+    setTogglingId(product.id)
+
+    // Optimistic update
+    setFeaturedOverrides(prev => ({ ...prev, [product.id]: nextVal }))
+
+    const res = await toggleProductFeaturedAction(product.id, nextVal)
+    setTogglingId(null)
+
+    if (!res.success) {
+      // Rollback
+      setFeaturedOverrides(prev => ({ ...prev, [product.id]: isCurrentlyFeatured }))
+    } else {
+      router.refresh()
+    }
+  }
+
+  const productsList = useMemo(() => {
+    return initialProducts.map(p => ({
+      ...p,
+      is_featured: p.id in featuredOverrides ? featuredOverrides[p.id] : p.is_featured
+    }))
+  }, [initialProducts, featuredOverrides])
 
   const filtered = useMemo(() => {
-    if (!searchTerm.trim()) return initialProducts
+    if (!searchTerm.trim()) return productsList
     const q = searchTerm.toLowerCase()
-    return initialProducts.filter(
+    return productsList.filter(
       p =>
         p.name.toLowerCase().includes(q) ||
         p.slug.toLowerCase().includes(q) ||
         (p.sku && p.sku.toLowerCase().includes(q)) ||
         (p.categories && p.categories.name.toLowerCase().includes(q))
     )
-  }, [initialProducts, searchTerm])
+  }, [productsList, searchTerm])
 
   return (
     <div className="space-y-4">
@@ -62,7 +91,7 @@ export function ProductsTableClient({ initialProducts }: { initialProducts: Prod
               <TableHead className="font-semibold text-xs uppercase tracking-wider">SKU</TableHead>
               <TableHead className="font-semibold text-xs uppercase tracking-wider">Prix (DZD)</TableHead>
               <TableHead className="font-semibold text-xs uppercase tracking-wider">Statut</TableHead>
-              <TableHead className="font-semibold text-xs uppercase tracking-wider">Mis en avant</TableHead>
+              <TableHead className="font-semibold text-xs uppercase tracking-wider text-center">Accueil Vedette</TableHead>
               <TableHead className="font-semibold text-xs uppercase tracking-wider text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -74,6 +103,7 @@ export function ProductsTableClient({ initialProducts }: { initialProducts: Prod
                   classes: 'bg-gray-100 text-gray-500 border-gray-200'
                 }
                 const isArchived = product.status === 'ARCHIVED'
+                const isToggling = togglingId === product.id
 
                 return (
                   <TableRow key={product.id} className="hover:bg-gray-50/50 transition-colors">
@@ -95,12 +125,29 @@ export function ProductsTableClient({ initialProducts }: { initialProducts: Prod
                         {statusCfg.label}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      {product.is_featured ? (
-                        <span className="text-amber-500 text-sm font-bold">★</span>
-                      ) : (
-                        <span className="text-gray-300 text-sm">—</span>
-                      )}
+                    <TableCell className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleFeatured(product)}
+                        disabled={isToggling || isArchived}
+                        title={product.is_featured ? "Retirer de la page d'accueil" : "Mettre en avant sur la page d'accueil"}
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold transition-all ${
+                          product.is_featured
+                            ? 'bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 shadow-xs'
+                            : 'bg-gray-50 text-gray-400 border border-gray-200 hover:text-gray-700 hover:border-gray-300'
+                        }`}
+                      >
+                        {isToggling ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <Star
+                            className={`h-3.5 w-3.5 ${
+                              product.is_featured ? 'fill-amber-400 text-amber-500' : 'text-gray-300'
+                            }`}
+                          />
+                        )}
+                        <span>{product.is_featured ? 'Vedette' : 'Non'}</span>
+                      </button>
                     </TableCell>
                     <TableCell className="text-right">
                       <TableRowActions
