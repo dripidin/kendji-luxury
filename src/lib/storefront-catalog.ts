@@ -4,6 +4,7 @@ import {
   Category,
   Collection,
   getAllProducts,
+  getProductBySlug,
   getCategories,
   getCategoryBySlug,
   getCollections,
@@ -117,6 +118,81 @@ export async function fetchStorefrontProducts(options?: {
   }
 
   return applySorting(products, sort)
+}
+
+/**
+ * Fetch a single product by slug from Supabase with live gallery imagery and live variants.
+ */
+export async function fetchStorefrontProductBySlug(slug: string): Promise<StorefrontProduct | null> {
+  try {
+    const supabase = createAdminClient()
+    const { data: item, error } = await supabase
+      .from('products')
+      .select('*, categories(id, name, slug), product_media(*), variants(*), product_collections(collections(id, name, slug))')
+      .eq('slug', slug)
+      .maybeSingle()
+
+    if (!error && item) {
+      const sortedMedia = (item.product_media || []).sort(
+        (a: { display_order: number; role: string }, b: { display_order: number; role: string }) => {
+          if (a.role === 'COVER') return -1
+          if (b.role === 'COVER') return 1
+          return (a.display_order || 0) - (b.display_order || 0)
+        }
+      )
+
+      const coverImage =
+        sortedMedia.find((m: { role: string }) => m.role === 'COVER')?.url ||
+        sortedMedia[0]?.url ||
+        '/products/product-1/white.jpg'
+
+      const images = sortedMedia.length > 0 ? sortedMedia.map((m: { url: string }) => m.url) : [coverImage]
+
+      const linkedCollections = (item.product_collections || [])
+        .map((pc: { collections?: { name: string; slug: string } }) => pc.collections)
+        .filter(Boolean)
+
+      const collectionName = linkedCollections[0]?.name || item.metadata?.collection || 'Signature Motifs'
+      const itemCollectionSlug = linkedCollections[0]?.slug || item.metadata?.collectionSlug || 'signature-motifs'
+
+      const rawVariants = item.variants || []
+      const variants = rawVariants
+        .filter((v: { is_available?: boolean }) => v.is_available !== false)
+        .map((v: { id: string; label: string }) => ({
+          id: v.id,
+          name: v.label,
+          image: coverImage
+        }))
+
+      return {
+        id: item.sku || item.id,
+        dbId: item.id,
+        slug: item.slug,
+        folderSlug: item.slug,
+        name: item.name,
+        category: item.categories?.name || 'Joaillerie',
+        categorySlug: item.categories?.slug || 'sets',
+        collection: collectionName,
+        collectionSlug: itemCollectionSlug,
+        price: Number(item.base_price),
+        currency: item.currency || 'DZD',
+        images,
+        coverImage,
+        description: item.description || item.short_description || '',
+        metallicFinish: item.metadata?.metallicFinish || 'Finition dorée haute joaillerie',
+        stonesOrInserts: item.metadata?.stonesOrInserts || 'Pierres et inserts précieux',
+        designCharacteristics: item.metadata?.designCharacteristics || 'Création artisanale de la maison KenDji',
+        piecesIncluded: item.metadata?.piecesIncluded || '1 Pièce',
+        isFeatured: item.is_featured || false,
+        variants: variants.length > 0 ? variants : undefined
+      }
+    }
+  } catch (e) {
+    console.warn('Supabase product slug query fallback to static:', e)
+  }
+
+  const fallback = getProductBySlug(slug)
+  return fallback || null
 }
 
 /**

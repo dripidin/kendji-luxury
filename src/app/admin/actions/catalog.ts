@@ -165,7 +165,8 @@ export async function updateProduct(id: string, data: ProductFormValues) {
         product_id: id,
         collection_id: colId
       }))
-      await supabase.from('product_collections').insert(collectionInserts)
+      const { error: colErr } = await supabase.from('product_collections').insert(collectionInserts)
+      if (colErr) console.warn('[Catalog] Collection insert error:', colErr.message)
     }
 
     // Update Media
@@ -178,7 +179,8 @@ export async function updateProduct(id: string, data: ProductFormValues) {
           role: m.role || (idx === 0 ? 'COVER' : 'GALLERY'),
           display_order: m.display_order ?? idx
         }))
-        await supabase.from('product_media').insert(mediaInserts)
+        const { error: medErr } = await supabase.from('product_media').insert(mediaInserts)
+        if (medErr) console.warn('[Catalog] Media insert error:', medErr.message)
       }
     }
 
@@ -194,7 +196,8 @@ export async function updateProduct(id: string, data: ProductFormValues) {
           stock: v.stock ?? 10,
           is_available: v.is_available ?? true
         }))
-        await supabase.from('variants').insert(variantInserts)
+        const { error: varErr } = await supabase.from('variants').insert(variantInserts)
+        if (varErr) console.warn('[Catalog] Variant insert error:', varErr.message)
       }
     }
 
@@ -202,7 +205,9 @@ export async function updateProduct(id: string, data: ProductFormValues) {
     safeRevalidatePath(`/admin/products/${id}`)
     safeRevalidatePath('/admin/inventory')
     safeRevalidatePath('/shop')
+    safeRevalidatePath('/')
     safeRevalidatePath(`/product/${validated.slug}`)
+    safeRevalidatePath('/(storefront)/product/[slug]')
 
     return { success: true, productId: id }
   } catch (err: unknown) {

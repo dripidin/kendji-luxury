@@ -190,26 +190,31 @@ export function ProductForm({
     setError(null)
     setSuccess(null)
 
-    let res
-    if (initialData?.id) {
-      res = await updateProduct(initialData.id, data)
-    } else {
-      res = await createProduct(data)
-    }
+    try {
+      let res
+      if (initialData?.id) {
+        res = await updateProduct(initialData.id, data)
+      } else {
+        res = await createProduct(data)
+      }
 
-    if (res?.error) {
-      setError(res.error)
       setIsPending(false)
-    } else if (res?.success) {
-      setSuccess(initialData?.id ? 'Product updated successfully!' : 'Product created successfully!')
-      setTimeout(() => {
-        if (res.productId) {
-          router.push(`/admin/products/${res.productId}`)
-        } else {
-          router.push('/admin/products')
-        }
+
+      if (res?.error) {
+        setError(res.error)
+      } else if (res?.success) {
+        setSuccess(initialData?.id ? 'Modifications enregistrées avec succès !' : 'Produit créé et publié avec succès !')
         router.refresh()
-      }, 1000)
+        if (!initialData?.id && res.productId) {
+          setTimeout(() => {
+            router.push(`/admin/products/${res.productId}`)
+          }, 800)
+        }
+      }
+    } catch (err: unknown) {
+      setIsPending(false)
+      const msg = err instanceof Error ? err.message : 'Une erreur inattendue est survenue lors de l\'enregistrement.'
+      setError(msg)
     }
   }
 

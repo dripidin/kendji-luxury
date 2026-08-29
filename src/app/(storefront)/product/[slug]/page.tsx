@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { Metadata } from "next"
-import { getAllProducts, getProductBySlug } from "@/lib/catalog"
+import { getAllProducts } from "@/lib/catalog"
+import { fetchStorefrontProductBySlug } from "@/lib/storefront-catalog"
 import { ProductHero } from "@/components/storefront/product/product-hero"
 import { CategoryEmphasis } from "@/components/storefront/product/category-emphasis"
 import { ProductStory } from "@/components/storefront/product/product-story"
@@ -8,6 +9,8 @@ import { ProductDetails } from "@/components/storefront/product/product-details"
 import { RelatedProducts } from "@/components/storefront/product/related-products"
 import { ProductFinalCTA } from "@/components/storefront/product/product-final-cta"
 import { StickyPurchaseBar } from "@/components/storefront/product/sticky-purchase-bar"
+
+export const dynamic = "force-dynamic"
 
 interface ProductPageProps {
   params: Promise<{ slug: string }>
@@ -22,7 +25,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params
-  const product = getProductBySlug(slug)
+  const product = await fetchStorefrontProductBySlug(slug)
 
   if (!product) {
     return {
@@ -44,7 +47,7 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
   const { slug } = await params
-  const product = getProductBySlug(slug)
+  const product = await fetchStorefrontProductBySlug(slug)
 
   if (!product) {
     notFound()
