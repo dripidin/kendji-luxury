@@ -11,6 +11,7 @@ export type ProductMediaItem = z.infer<typeof productMediaItemSchema>
 export const productVariantItemSchema = z.object({
   label: z.string().min(1, "Variant label is required"),
   sku: z.string().optional(),
+  image: z.string().optional(),
   price_override: z.number().min(0).optional(),
   stock: z.number().int().min(0),
   is_available: z.boolean(),

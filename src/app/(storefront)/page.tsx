@@ -7,6 +7,9 @@ import { EditorialMoment } from "@/components/storefront/home/editorial-moment"
 import { TrustSection } from "@/components/storefront/home/trust-section"
 import { FinalCTA } from "@/components/storefront/home/final-cta"
 import { getHomepageContent } from "@/lib/cms"
+import { fetchFeaturedStorefrontProducts, fetchStorefrontProductBySlug } from "@/lib/storefront-catalog"
+
+export const dynamic = "force-dynamic"
 
 export const metadata = {
   title: "KenDji Luxury • High Jewelry & Timeless Emblems",
@@ -15,6 +18,19 @@ export const metadata = {
 
 export default async function HomePage() {
   const content = await getHomepageContent()
+
+  // Fetch featured products dynamically from Supabase
+  let featuredProducts: any[] = []
+  if (content.featured_products?.product_slugs && content.featured_products.product_slugs.length > 0) {
+    const fetched = await Promise.all(
+      content.featured_products.product_slugs.map(slug => fetchStorefrontProductBySlug(slug))
+    )
+    featuredProducts = fetched.filter(Boolean)
+  }
+
+  if (featuredProducts.length === 0) {
+    featuredProducts = await fetchFeaturedStorefrontProducts(8)
+  }
 
   return (
     <div className="flex flex-col w-full">
@@ -25,7 +41,7 @@ export default async function HomePage() {
       <CollectionIntro />
 
       {/* 3. Featured Selection / Signature Pieces */}
-      <FeaturedPieces productSlugs={content.featured_products.product_slugs} />
+      <FeaturedPieces products={featuredProducts} />
 
       {/* 4. Brand & Craftsmanship Story */}
       <BrandStory />

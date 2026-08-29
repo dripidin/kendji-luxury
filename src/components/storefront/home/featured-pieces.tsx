@@ -4,18 +4,21 @@ import Link from "next/link"
 import { Container, Section } from "@/components/storefront/layout/container"
 import { ProductCard } from "@/components/storefront/product/product-card"
 import { Button } from "@/components/ui/button"
-import { getFeaturedProducts, getProductBySlug } from "@/lib/catalog"
+import { Product, getFeaturedProducts, getProductBySlug } from "@/lib/catalog"
 import { useI18n } from "@/lib/i18n/context"
 
 interface FeaturedPiecesProps {
+  products?: Product[]
   productSlugs?: string[]
 }
 
-export function FeaturedPieces({ productSlugs }: FeaturedPiecesProps) {
+export function FeaturedPieces({ products: initialProducts, productSlugs }: FeaturedPiecesProps) {
   const { t } = useI18n()
 
-  let products = (productSlugs && productSlugs.length > 0)
-    ? productSlugs.map(slug => getProductBySlug(slug)).filter(Boolean)
+  let products = (initialProducts && initialProducts.length > 0)
+    ? initialProducts
+    : (productSlugs && productSlugs.length > 0)
+    ? productSlugs.map(slug => getProductBySlug(slug)).filter(Boolean) as Product[]
     : getFeaturedProducts().slice(0, 4)
 
   if (products.length === 0) {

@@ -121,6 +121,7 @@ export function ProductForm({
   })
 
   const watchedMedia = useWatch({ control, name: 'media' }) || []
+  const watchedVariants = useWatch({ control, name: 'variants' }) || []
   const watchedCollectionIds = useWatch({ control, name: 'collection_ids' }) || []
 
   // Auto-generate slug from name
@@ -694,6 +695,7 @@ export function ProductForm({
                   appendVariant({
                     label: '',
                     sku: '',
+                    image: '',
                     stock: 10,
                     is_available: true
                   })
@@ -713,60 +715,97 @@ export function ProductForm({
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {variantFields.map((item, index) => (
-                    <div
-                      key={item.id}
-                      className="border rounded-lg p-4 bg-card grid grid-cols-1 sm:grid-cols-5 gap-3 items-end"
-                    >
-                      <div className="space-y-1 sm:col-span-2">
-                        <Label className="text-xs">Variant Label *</Label>
-                        <Input
-                          placeholder="e.g. Blanc (White Enamel)"
-                          {...register(`variants.${index}.label` as const)}
-                        />
-                        {errors.variants?.[index]?.label && (
-                          <p className="text-red-500 text-xs">
-                            {errors.variants[index]?.label?.message}
-                          </p>
-                        )}
-                      </div>
+                  {variantFields.map((item, index) => {
+                    const currentVariant = watchedVariants[index] || item
+                    const variantImg = currentVariant.image || ''
 
-                      <div className="space-y-1">
-                        <Label className="text-xs">SKU</Label>
-                        <Input
-                          placeholder="KDL-FLW-01-WHT"
-                          {...register(`variants.${index}.sku` as const)}
-                        />
-                      </div>
+                    return (
+                      <div
+                        key={item.id}
+                        className="border rounded-lg p-4 bg-card grid grid-cols-1 sm:grid-cols-12 gap-3 items-end"
+                      >
+                        {/* Image thumbnail / preview */}
+                        <div className="sm:col-span-2 flex flex-col items-center gap-1.5">
+                          <Label className="text-xs self-start">Photo</Label>
+                          <div className="relative h-14 w-14 rounded-md border bg-muted overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {variantImg ? (
+                              <Image src={variantImg} alt="Variante" fill className="object-cover" />
+                            ) : (
+                              <ImageIcon className="h-5 w-5 text-gray-300" />
+                            )}
+                          </div>
+                        </div>
 
-                      <div className="space-y-1">
-                        <Label className="text-xs">Stock Level</Label>
-                        <Input
-                          type="number"
-                          placeholder="10"
-                          {...register(`variants.${index}.stock` as const, { valueAsNumber: true })}
-                        />
-                      </div>
-
-                      <div className="flex items-center justify-between sm:justify-end gap-3 pb-2">
-                        <label className="flex items-center space-x-1.5 text-xs cursor-pointer">
-                          <input
-                            type="checkbox"
-                            {...register(`variants.${index}.is_available` as const)}
-                            className="rounded border-gray-300 text-black"
+                        {/* Variant label */}
+                        <div className="space-y-1 sm:col-span-3">
+                          <Label className="text-xs">Nom / Variante *</Label>
+                          <Input
+                            placeholder="ex: Blanc Émail, Or Rose"
+                            {...register(`variants.${index}.label` as const)}
                           />
-                          <span>Active</span>
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => removeVariant(index)}
-                          className="text-red-500 hover:text-red-700 p-1"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
+                          {errors.variants?.[index]?.label && (
+                            <p className="text-red-500 text-xs">
+                              {errors.variants[index]?.label?.message}
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Image selector from gallery */}
+                        <div className="space-y-1 sm:col-span-3">
+                          <Label className="text-xs">Associer une Image</Label>
+                          <select
+                            {...register(`variants.${index}.image` as const)}
+                            className="w-full text-xs h-9 rounded-md border border-input bg-background px-2"
+                          >
+                            <option value="">-- Choisir depuis la Galerie --</option>
+                            {watchedMedia.map((m, mIdx) => (
+                              <option key={mIdx} value={m.url}>
+                                {m.role === 'COVER' ? '⭐ Principale' : `Photo ${mIdx + 1}`} ({m.url.split('/').pop()})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* SKU */}
+                        <div className="space-y-1 sm:col-span-2">
+                          <Label className="text-xs">SKU</Label>
+                          <Input
+                            placeholder="KDL-01-WHT"
+                            {...register(`variants.${index}.sku` as const)}
+                          />
+                        </div>
+
+                        {/* Stock */}
+                        <div className="space-y-1 sm:col-span-1">
+                          <Label className="text-xs">Stock</Label>
+                          <Input
+                            type="number"
+                            placeholder="10"
+                            {...register(`variants.${index}.stock` as const, { valueAsNumber: true })}
+                          />
+                        </div>
+
+                        {/* Active & Delete */}
+                        <div className="flex items-center justify-between sm:justify-end gap-2 pb-1 sm:col-span-1">
+                          <label className="flex items-center space-x-1 text-xs cursor-pointer">
+                            <input
+                              type="checkbox"
+                              {...register(`variants.${index}.is_available` as const)}
+                              className="rounded border-gray-300 text-black"
+                            />
+                            <span className="text-[11px]">Actif</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => removeVariant(index)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </CardContent>

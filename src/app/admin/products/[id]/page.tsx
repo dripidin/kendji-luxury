@@ -51,6 +51,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     variants: (pData.variants || []).map((v: { label: string; sku: string; price_override: number; stock: number; is_available: boolean }) => ({
       label: v.label,
       sku: v.sku || '',
+      image: pData.metadata?.variant_images?.[v.label] || pData.metadata?.variant_images?.[v.sku] || '',
       price_override: v.price_override ? Number(v.price_override) : undefined,
       stock: v.stock || 10,
       is_available: v.is_available ?? true

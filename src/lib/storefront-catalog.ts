@@ -156,13 +156,17 @@ export async function fetchStorefrontProductBySlug(slug: string): Promise<Storef
       const itemCollectionSlug = linkedCollections[0]?.slug || item.metadata?.collectionSlug || 'signature-motifs'
 
       const rawVariants = item.variants || []
+      const variantImagesMap = item.metadata?.variant_images || {}
       const variants = rawVariants
         .filter((v: { is_available?: boolean }) => v.is_available !== false)
-        .map((v: { id: string; label: string }) => ({
-          id: v.id,
-          name: v.label,
-          image: coverImage
-        }))
+        .map((v: { id: string; label: string; sku?: string }) => {
+          const specificImg = (v.label && variantImagesMap[v.label]) || (v.sku && variantImagesMap[v.sku]) || coverImage
+          return {
+            id: v.id,
+            name: v.label,
+            image: specificImg
+          }
+        })
 
       return {
         id: item.sku || item.id,
@@ -193,6 +197,80 @@ export async function fetchStorefrontProductBySlug(slug: string): Promise<Storef
 
   const fallback = getProductBySlug(slug)
   return fallback || null
+}
+
+/**
+ * Fetch all featured products from Supabase (is_featured = true) for Homepage "Créations Emblématiques".
+ */
+export async function fetchFeaturedStorefrontProducts(limit: number = 8): Promise<StorefrontProduct[]> {
+  try {
+    const supabase = createAdminClient()
+    const { data, error } = await supabase
+      .from('products')
+      .select('*, categories(id, name, slug), product_media(*), variants(*), product_collections(collections(id, name, slug))')
+      .eq('status', 'PUBLISHED')
+      .eq('is_featured', true)
+      .order('updated_at', { ascending: false })
+      .limit(limit)
+
+    if (!error && data && data.length > 0) {
+      return data.map(item => {
+        const sortedMedia = (item.product_media || []).sort(
+          (a: { display_order: number; role: string }, b: { display_order: number; role: string }) => {
+            if (a.role === 'COVER') return -1
+            if (b.role === 'COVER') return 1
+            return (a.display_order || 0) - (b.display_order || 0)
+          }
+        )
+
+        const coverImage =
+          sortedMedia.find((m: { role: string }) => m.role === 'COVER')?.url ||
+          sortedMedia[0]?.url ||
+          '/products/product-1/white.jpg'
+
+        const images = sortedMedia.length > 0 ? sortedMedia.map((m: { url: string }) => m.url) : [coverImage]
+
+        const linkedCollections = (item.product_collections || [])
+          .map((pc: { collections?: { name: string; slug: string } }) => pc.collections)
+          .filter(Boolean)
+
+        const collectionName = linkedCollections[0]?.name || item.metadata?.collection || 'Signature Motifs'
+        const itemCollectionSlug = linkedCollections[0]?.slug || item.metadata?.collectionSlug || 'signature-motifs'
+
+        return {
+          id: item.sku || item.id,
+          dbId: item.id,
+          slug: item.slug,
+          folderSlug: item.slug,
+          name: item.name,
+          category: item.categories?.name || 'Joaillerie',
+          categorySlug: item.categories?.slug || 'sets',
+          collection: collectionName,
+          collectionSlug: itemCollectionSlug,
+          price: Number(item.base_price),
+          currency: item.currency || 'DZD',
+          images,
+          coverImage,
+          description: item.description || item.short_description || '',
+          metallicFinish: item.metadata?.metallicFinish,
+          stonesOrInserts: item.metadata?.stonesOrInserts,
+          designCharacteristics: item.metadata?.designCharacteristics,
+          piecesIncluded: item.metadata?.piecesIncluded,
+          isFeatured: true,
+          variants: (item.variants || []).map((v: { id: string; label: string }) => ({
+            id: v.id,
+            name: v.label,
+            image: coverImage
+          }))
+        }
+      })
+    }
+  } catch (e) {
+    console.warn('Supabase featured products query fallback to static catalog:', e)
+  }
+
+  // Fallback to static catalog projection
+  return getAllProducts().filter(p => p.isFeatured)
 }
 
 /**

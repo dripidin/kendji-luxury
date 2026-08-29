@@ -46,6 +46,16 @@ export async function createProduct(data: ProductFormValues) {
       return { error: `Le slug "${validated.slug}" est déjà utilisé par un autre produit.` }
     }
 
+    const variantImagesMap: Record<string, string> = {}
+    if (validated.variants) {
+      for (const v of validated.variants) {
+        if (v.image && v.label) {
+          variantImagesMap[v.label] = v.image
+          if (v.sku) variantImagesMap[v.sku] = v.image
+        }
+      }
+    }
+
     // 3. Insert Product
     const { data: newProduct, error: prodError } = await supabase
       .from('products')
@@ -61,7 +71,10 @@ export async function createProduct(data: ProductFormValues) {
         status: validated.status,
         category_id: validated.category_id,
         is_featured: validated.is_featured,
-        metadata: validated.metadata || {}
+        metadata: {
+          ...(validated.metadata || {}),
+          variant_images: variantImagesMap
+        }
       })
       .select('id')
       .single()
@@ -134,6 +147,16 @@ export async function updateProduct(id: string, data: ProductFormValues) {
       return { error: `Le slug "${validated.slug}" est déjà utilisé par un autre bijou.` }
     }
 
+    const variantImagesMap: Record<string, string> = {}
+    if (validated.variants) {
+      for (const v of validated.variants) {
+        if (v.image && v.label) {
+          variantImagesMap[v.label] = v.image
+          if (v.sku) variantImagesMap[v.sku] = v.image
+        }
+      }
+    }
+
     // Update main product record
     const { error: prodError } = await supabase
       .from('products')
@@ -149,7 +172,10 @@ export async function updateProduct(id: string, data: ProductFormValues) {
         status: validated.status,
         category_id: validated.category_id,
         is_featured: validated.is_featured,
-        metadata: validated.metadata || {},
+        metadata: {
+          ...(validated.metadata || {}),
+          variant_images: variantImagesMap
+        },
         updated_at: new Date().toISOString()
       })
       .eq('id', id)
