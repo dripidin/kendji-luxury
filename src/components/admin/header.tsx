@@ -1,9 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
-import { LogOut, Menu } from 'lucide-react'
+import { LogOut, Menu, ExternalLink } from 'lucide-react'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { AdminSidebar } from './sidebar'
 
@@ -33,10 +34,24 @@ export function AdminHeader() {
         <span className="font-bold tracking-wider uppercase">KenDji</span>
       </div>
       
-      <div className="flex flex-1 items-center justify-end">
-        <Button variant="ghost" size="sm" onClick={handleLogout} className="text-gray-500 hover:text-black">
-          <LogOut className="mr-2 h-4 w-4" />
-          Logout
+      <div className="flex flex-1 items-center justify-end gap-3">
+        <Link 
+          href="/" 
+          target="_blank"
+          className="text-xs text-gray-500 hover:text-gray-900 flex items-center gap-1.5 px-3 py-1.5 rounded-md hover:bg-gray-50 transition-colors"
+        >
+          <span>Boutique</span>
+          <span className="text-[10px] text-gray-400">/ المتجر</span>
+          <ExternalLink className="h-3 w-3" />
+        </Link>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleLogout} 
+          className="text-gray-500 hover:text-rose-600 hover:bg-rose-50 text-xs gap-1.5"
+        >
+          <LogOut className="h-3.5 w-3.5" />
+          <span>Déconnexion / خروج</span>
         </Button>
       </div>
     </header>
