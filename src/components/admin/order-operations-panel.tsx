@@ -279,17 +279,17 @@ export function OrderOperationsPanel({
         ) : (
           <div className="space-y-3">
             <p className="text-xs text-gray-500">
-              Générez le bordereau officiel d&apos;expédition et transmettez les coordonnées de livraison au transporteur actif (Yalidine, Ecotrack, ZR Express, Maystro, NOEST).
+              Cliquez ci-dessous pour transmettre cette commande confirmée directement à votre société de livraison (Ecotrack / Yalidine) et générer le numéro de suivi officiel.
             </p>
             <div className="flex items-center gap-2">
               <Button
                 onClick={handleDispatchShipment}
                 disabled={isLoading || currentStatus === "CANCELLED"}
                 size="sm"
-                className="flex-1 bg-[#1A1A1A] hover:bg-black text-white text-xs gap-2"
+                className="flex-1 bg-[#1A1A1A] hover:bg-black text-white text-xs gap-2 py-2.5 h-auto font-medium"
               >
                 {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Truck size={14} />}
-                <span>Créer l&apos;Expédition Transporteur</span>
+                <span>Expédition vers Transporteur</span>
               </Button>
 
               <ShippingLabelModal

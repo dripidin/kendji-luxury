@@ -240,55 +240,13 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
 
           await supabase.from('order_items').insert(orderItemsToInsert)
 
-          // Dispatch to courier (Ecotrack / Yalidine / etc.) if enabled
+          // Insert delivery record in PENDING state (operator will confirm and dispatch manually from admin)
           const courierCfg = globalSettings.courier
-          let trackingNumber: string | null = null
-          let courierStatus = 'PENDING'
-
-          if (courierCfg?.enabled) {
-            try {
-              const credentials = {
-                apiId: courierCfg.api_id || '',
-                apiToken: courierCfg.api_token || '',
-                apiKey: courierCfg.api_key || '',
-                token: courierCfg.api_token || courierCfg.api_key || '',
-                baseUrl: courierCfg.base_url || 'https://app.ecotrack.dz',
-                base_url: courierCfg.base_url || 'https://app.ecotrack.dz'
-              }
-              const courier = getActiveCourierProvider(courierCfg.active_provider, credentials)
-              const shipResult = await courier.createShipment({
-                orderId: orderRecord.id,
-                orderNumber,
-                customer: {
-                  fullName: customer.fullName.trim(),
-                  phone: normalizedPhone,
-                  wilaya: String(wilayaObj.code),
-                  commune: delivery.commune.trim(),
-                  address: delivery.address.trim()
-                },
-                items: itemSnapshots.map(i => ({ name: i.productNameSnapshot, quantity: i.quantity, unitPrice: i.unitPrice })),
-                deliveryMethod: delivery.deliveryMethod,
-                codAmountToCollect: calculatedTotal
-              })
-
-              if (shipResult.success && shipResult.trackingNumber) {
-                trackingNumber = shipResult.trackingNumber
-                courierStatus = 'DISPATCHED'
-              } else if (shipResult.error) {
-                console.error('[Courier] Shipment creation failed:', shipResult.error)
-                courierStatus = 'FAILED'
-              }
-            } catch (courierErr) {
-              console.error('[Courier] Dispatch exception:', courierErr)
-            }
-          }
-
-          // Insert delivery record with real tracking number if obtained
           await supabase.from('deliveries').insert({
             order_id: orderRecord.id,
-            provider: courierCfg?.active_provider || 'YALIDINE',
-            status: courierStatus,
-            tracking_number: trackingNumber
+            provider: courierCfg?.active_provider || 'ECOTRACK',
+            status: 'PENDING',
+            tracking_number: null
           })
         }
       }

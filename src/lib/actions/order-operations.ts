@@ -6,6 +6,7 @@ import { OrderStatus, isValidOrderStatusTransition } from "@/lib/commerce/order-
 import { recordTimelineEvent } from "@/lib/commerce/order-timeline"
 import { adjustStock, StockStatus } from "@/lib/commerce/inventory"
 import { getActiveCourierProvider } from "@/lib/courier/factory"
+import { getGlobalSettings } from "@/lib/settings"
 import { reconcileCodOrder } from "@/lib/commerce/cod-reconciliation"
 
 export interface OrderOperationResult {
@@ -192,7 +193,21 @@ export async function createShipmentAction(
   const safeCustName = custRecord?.name || "Client KenDji"
   const safeCustPhone = custRecord?.phone || "0550000000"
 
-  const provider = getActiveCourierProvider(providerCode)
+  // Load active courier credentials from site_settings
+  const settings = await getGlobalSettings({ unmaskSecrets: true })
+  const courierCfg = settings.courier
+  const activeCode = providerCode || courierCfg?.active_provider || "ECOTRACK"
+
+  const credentials = {
+    apiId: courierCfg?.api_id || "",
+    apiToken: courierCfg?.api_token || "",
+    apiKey: courierCfg?.api_key || "",
+    token: courierCfg?.api_token || courierCfg?.api_key || "",
+    baseUrl: courierCfg?.base_url || "https://app.ecotrack.dz",
+    base_url: courierCfg?.base_url || "https://app.ecotrack.dz"
+  }
+
+  const provider = getActiveCourierProvider(activeCode, credentials)
 
   const shipmentResult = await provider.createShipment({
     orderId,
