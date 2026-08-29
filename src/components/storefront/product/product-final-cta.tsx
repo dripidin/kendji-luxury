@@ -5,6 +5,7 @@ import Link from "next/link"
 import { Product, BACKGROUND_ASSETS } from "@/lib/catalog"
 import { Container } from "@/components/storefront/layout/container"
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n/context"
 
 interface ProductFinalCTAProps {
   product: Product
@@ -12,6 +13,7 @@ interface ProductFinalCTAProps {
 
 export function ProductFinalCTA({ product }: ProductFinalCTAProps) {
   const bg = BACKGROUND_ASSETS['KJ-BG-05']
+  const { t, dir } = useI18n()
 
   const scrollToHero = () => {
     if (typeof window !== "undefined") {
@@ -20,7 +22,7 @@ export function ProductFinalCTA({ product }: ProductFinalCTAProps) {
   }
 
   return (
-    <section className="relative py-28 md:py-36 bg-[#1A1A1A] text-white overflow-hidden border-t border-white/10">
+    <section className="relative py-28 md:py-36 bg-[#1A1A1A] text-white overflow-hidden border-t border-white/10" dir={dir}>
       {/* Background Atmosphere */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -35,25 +37,25 @@ export function ProductFinalCTA({ product }: ProductFinalCTAProps) {
 
       <Container className="relative z-10 text-center max-w-2xl mx-auto space-y-6">
         <span className="text-[11px] uppercase tracking-[0.35em] text-white/70 font-sans block">
-          KenDji Boutique • {product.collection}
+          {t.productFinalCta?.badge || 'متجر دار كندجي'} • {product.collection}
         </span>
 
         <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-white leading-tight">
-          Adorn Yourself with <br />
-          <span className="font-normal italic">Lasting Distinction.</span>
+          {t.productFinalCta?.titleLine1 || 'تألقي بأنوثة'} <br />
+          <span className="font-normal italic">{t.productFinalCta?.titleLine2 || 'وجاذبية خالدة.'}</span>
         </h2>
 
         <p className="text-sm text-white/80 font-sans font-light max-w-lg mx-auto leading-relaxed">
-          Order the {product.name} today. Receive your bespoke gift box and pay upon delivery in Algeria.
+          {t.productFinalCta?.desc || `اطلبي ${product.name} اليوم وتصلي بعلبة مخملية فاخرة مع ميزة الدفع عند الاستلام في الجزائر.`}
         </p>
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Button
             size="lg"
-            className="w-full sm:w-auto px-10 py-6 text-xs uppercase tracking-[0.25em] bg-white text-[#1A1A1A] hover:bg-[#F9F9F7] transition-all duration-300 shadow-xl"
+            className="w-full sm:w-auto px-10 py-6 text-xs uppercase tracking-[0.25em] bg-white text-[#1A1A1A] hover:bg-[#F9F9F7] transition-all duration-300 shadow-xl font-bold"
             onClick={scrollToHero}
           >
-            Commander Maintenant
+            {t.productFinalCta?.orderNow || 'اطلبي الآن'}
           </Button>
 
           <Link href={`/collections/${product.collectionSlug}`}>
@@ -62,7 +64,7 @@ export function ProductFinalCTA({ product }: ProductFinalCTAProps) {
               size="lg"
               className="w-full sm:w-auto px-8 py-6 text-xs uppercase tracking-[0.25em] border-white/30 text-white hover:bg-white/10 hover:border-white transition-all duration-300"
             >
-              Voir la Collection
+              {t.productFinalCta?.viewCollection || 'عرض المجموعة'}
             </Button>
           </Link>
         </div>

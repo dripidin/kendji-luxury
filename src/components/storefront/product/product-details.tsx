@@ -1,34 +1,39 @@
+'use client'
+
 import { Product } from "@/lib/catalog"
 import { Container } from "@/components/storefront/layout/container"
+import { useI18n } from "@/lib/i18n/context"
 
 interface ProductDetailsProps {
   product: Product
 }
 
 export function ProductDetails({ product }: ProductDetailsProps) {
+  const { t, dir } = useI18n()
+
   const specs = [
-    { label: "Product Reference", value: product.id },
-    { label: "Category", value: product.category },
-    { label: "Collection Universe", value: product.collection },
-    { label: "Pieces Included", value: product.piecesIncluded },
-    { label: "Metallic Finish", value: product.metallicFinish },
-    { label: "Stones & Inlays", value: product.stonesOrInserts },
-    { label: "Payment Method", value: "Paiement en espèces à la livraison (Cash on Delivery)" },
-    { label: "Delivery Territory", value: "Livraison à domicile ou point relais partout en Algérie" },
-    { label: "Care Recommendations", value: "Conserver dans son écrin d'origine. Éviter le contact prolongé avec parfums et produits chimiques." }
+    { label: t.productDetails?.ref || "رمز القطعة", value: product.id },
+    { label: t.productDetails?.category || "التصنيف", value: product.category },
+    { label: t.productDetails?.collection || "المجموعة", value: product.collection },
+    { label: t.productDetails?.pieces || "عدد القطع", value: product.piecesIncluded },
+    { label: t.productDetails?.finish || "طلاء المعدن", value: product.metallicFinish },
+    { label: t.productDetails?.stones || "الأحجار والتطعيمات", value: product.stonesOrInserts },
+    { label: t.productDetails?.paymentMethod || "طريقة الدفع", value: t.productDetails?.paymentMethodVal || "الدفع نقداً عند الاستلام ومعاينة الطرد" },
+    { label: t.productDetails?.territory || "نطاق التوصيل", value: t.productDetails?.territoryVal || "توصيل للمنزل أو المكتب عبر 58 ولاية جزائرية" },
+    { label: t.productDetails?.care || "إرشادات الحفظ", value: t.productDetails?.careVal || "يحفظ في العلبة المخملية الأصلية، ويفضل تجنب الملامسة المباشرة للعطور والمواد الكيميائية." }
   ].filter(item => Boolean(item.value))
 
   return (
-    <section className="py-20 bg-white text-[#1A1A1A] border-t border-[#1A1A1A]/10">
+    <section className="py-20 bg-white text-[#1A1A1A] border-t border-[#1A1A1A]/10" dir={dir}>
       <Container>
         <div className="max-w-4xl mx-auto space-y-8">
           
           <div className="space-y-2 border-b border-[#1A1A1A]/10 pb-4">
             <span className="text-[11px] uppercase tracking-[0.3em] text-[#1A1A1A]/60 font-sans block">
-              Specifications
+              {t.productDetails?.badge || 'المواصفات الفنية'}
             </span>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight">
-              Verified Product Details
+              {t.productDetails?.title || 'تفاصيل المنتج المعتمدة'}
             </h2>
           </div>
 

@@ -41,21 +41,23 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: siteUrlObj,
   title: {
-    default: "KenDji Luxury • Joaillerie & Parures d'Exception en Algérie",
-    template: "%s • KenDji Luxury",
+    default: "كندجي للمجوهرات الفاخرة • فخامة وأطقم استثنائية في الجزائر",
+    template: "%s • كندجي للمجوهرات الفاخرة",
   },
   description:
-    "Maison de joaillerie et parures raffinées. Découvrez notre sélection exclusive de colliers, parures, bracelets et bagues avec paiement à la livraison sécurisé partout en Algérie.",
+    "دار مجوهرات وأطقم راقية. اكتشف تشكيلتنا الحصرية من القلادات والأطقم والأساور مع ميزة الدفع عند الاستلام المضمون عبر 58 ولاية جزائرية.",
   keywords: [
-    "joaillerie Algérie",
-    "parure de bijoux",
-    "bijoux de luxe Alger",
+    "مجوهرات الجزائر",
+    "مجوهرات فاخرة",
+    "أطقم مجوهرات",
+    "سلاسل ذهبية",
+    "الدفع عند الاستلام الجزائر",
     "KenDji Luxury",
-    "collier femme",
-    "bracelets et bagues",
-    "paiement livraison Alger",
-    "bijouterie en ligne Algérie"
+    "Haute Joaillerie Algérie"
   ],
+  alternates: {
+    canonical: siteUrl,
+  },
   authors: [{ name: "KenDji Luxury" }],
   creator: "KenDji Luxury",
   publisher: "KenDji Luxury",
@@ -66,26 +68,26 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "fr_DZ",
+    locale: "ar_DZ",
     url: siteUrl,
-    siteName: "KenDji Luxury",
-    title: "KenDji Luxury • Joaillerie & Parures d'Exception",
+    siteName: "كندجي للمجوهرات الفاخرة",
+    title: "كندجي للمجوهرات الفاخرة • إبداعات استثنائية",
     description:
-      "Sélection exclusive de bijoux et parures raffinées. Livraison sécurisée avec paiement à la réception.",
+      "تألقي بأرقى التصاميم الجوهرية مع التوصيل والدفع عند الاستلام عبر 58 ولاية.",
     images: [
       {
         url: "/images/og-cover.jpg",
         width: 1200,
         height: 630,
-        alt: "KenDji Luxury — Parures d'Exception",
+        alt: "كندجي للمجوهرات الفاخرة",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "KenDji Luxury • Joaillerie d'Exception",
+    title: "كندجي للمجوهرات الفاخرة",
     description:
-      "Bijoux et parures de créateurs. Paiement à la livraison partout en Algérie.",
+      "مجوهرات وأطقم راقية. الدفع عند الاستلام عبر جميع الولايات.",
     images: ["/images/og-cover.jpg"],
   },
   robots: {
@@ -108,7 +110,8 @@ export default function RootLayout({
 }) {
   return (
     <html
-      lang="fr"
+      lang="ar"
+      dir="rtl"
       className={`${bodoniModa.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ivory text-charcoal">{children}</body>

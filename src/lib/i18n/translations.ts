@@ -55,6 +55,73 @@ export interface Dictionary {
     ctaSubtitle: string
     ctaButton: string
   }
+  collectionIntro: {
+    badge: string
+    title: string
+    subtitle: string
+    exploreUniverse: string
+  }
+  editorial: {
+    badge: string
+    quote: string
+    f1: string
+    f2: string
+    f3: string
+  }
+  categoryEmphasis: {
+    setsBadge: string
+    setsTitle: string
+    setsDesc: string
+    necklacesBadge: string
+    necklacesTitle: string
+    necklacesDesc: string
+    braceletsBadge: string
+    braceletsTitle: string
+    braceletsDesc: string
+    watchesBadge: string
+    watchesTitle: string
+    watchesDesc: string
+    ringsBadge: string
+    ringsTitle: string
+    ringsDesc: string
+  }
+  productStory: {
+    badge: string
+    title: string
+    quote: string
+    signatureLabel: string
+    finishLabel: string
+    notice: string
+  }
+  productDetails: {
+    badge: string
+    title: string
+    ref: string
+    category: string
+    collection: string
+    pieces: string
+    finish: string
+    stones: string
+    paymentMethod: string
+    paymentMethodVal: string
+    territory: string
+    territoryVal: string
+    care: string
+    careVal: string
+  }
+  relatedProducts: {
+    badge: string
+    title: string
+    exploreCollection: string
+  }
+  productFinalCta: {
+    badge: string
+    titleLine1: string
+    titleLine2: string
+    desc: string
+    orderNow: string
+    viewCollection: string
+  }
   categories: {
     sets: string
     necklaces: string
@@ -146,150 +213,6 @@ export interface Dictionary {
 }
 
 export const TRANSLATIONS: Record<Locale, Dictionary> = {
-  fr: {
-    common: {
-      brandName: 'KenDji Luxury',
-      currency: 'Dinar Algérien',
-      currencySymbol: 'DA',
-      codBadge: 'Paiement à la Livraison 58 Wilayas',
-      deliveryGuarantee: 'Livraison express sécurisée en Algérie',
-      shopNow: 'Explorer la Collection',
-      viewAll: 'Voir toutes les créations',
-      details: 'Voir les détails',
-      addToCart: 'Ajouter au Panier',
-      orderNow: 'Commander en 1 Clic (COD)',
-      buyNow: 'Acheter Maintenant',
-      contactUs: 'Contactez-nous',
-      back: 'Retour',
-      save: 'Enregistrer',
-      cancel: 'Annuler',
-      loading: 'Chargement...',
-      success: 'Opération réussie',
-      error: 'Une erreur est survenue'
-    },
-    nav: {
-      home: 'Accueil',
-      shop: 'Boutique',
-      categories: 'Catégories',
-      collections: 'Collections',
-      about: 'Maison KenDji',
-      contact: 'Contact',
-      cart: 'Panier',
-      search: 'Recherche'
-    },
-    hero: {
-      badge: 'KenDji Luxury • Haute Joaillerie',
-      headline: 'L’Architecture de l’Intimité.',
-      subheadline: 'Une joaillerie d’exception conçue avec une précision architecturale. Des créations précieuses pensées comme des emblèmes d’élégance intemporelle.',
-      ctaPrimary: 'Explorer la Collection',
-      ctaSecondary: 'Découvrir les Univers',
-      signatureSelection: 'Sélection Signature'
-    },
-    home: {
-      featuredBadge: 'Sélection Exclusive',
-      featuredTitle: 'Créations Emblématiques',
-      featuredSubtitle: 'Des pièces maîtresses alliant finitions dorées, nacre et pierres éclatantes.',
-      worldsBadge: 'Univers KenDji',
-      worldsTitle: 'Explorez nos Collections',
-      worldsSubtitle: 'Plongez dans des récits joailliers uniques, du romantisme botanique à l’audace contemporaine.',
-      storyBadge: 'Notre Philosophie',
-      storyTitle: 'La Maison KenDji',
-      storyP1: 'Née d’une passion pour la pureté des lignes et l’artisanat d’art, KenDji Luxury réinvente le bijou comme une signature personnelle.',
-      storyP2: 'Chaque création est livrée dans son écrin de velours avec son certificat d’authenticité partout en Algérie.',
-      storyCta: 'Découvrir nos créations',
-      ctaTitle: 'Sublimez Chaque Instant',
-      ctaSubtitle: 'Commandez en toute sérénité avec le paiement en espèces à la livraison.',
-      ctaButton: 'Accéder à la Boutique'
-    },
-    categories: {
-      sets: 'Parures & Ensembles',
-      necklaces: 'Colliers & Pendentifs',
-      bracelets: 'Bracelets & Joncs',
-      rings: 'Bagues & Solitaires',
-      watches: 'Montres Joaillières',
-      all: 'Toutes les créations'
-    },
-    catalog: {
-      allCategories: 'Toutes les catégories',
-      allCollections: 'Toutes les collections',
-      filterCategory: 'Catégorie',
-      filterCollection: 'Collection',
-      sortBy: 'Trier par',
-      sortDefault: 'Par défaut',
-      sortPriceAsc: 'Prix croissant',
-      sortPriceDesc: 'Prix décroissant',
-      resultsCount: 'pièces trouvées',
-      noProducts: 'Aucun bijou trouvé dans cette sélection.',
-      viewDetails: 'Découvrir'
-    },
-    product: {
-      inStock: 'En Stock • Expédition Immédiate',
-      outOfStock: 'Victime de son succès',
-      material: 'Matériau d’Exception',
-      finish: 'Finition Métallique',
-      stones: 'Pierres & Nacre',
-      dimensions: 'Dimensions',
-      piecesIncluded: 'Pièces Incluses',
-      care: 'Conseils d’Entretien',
-      deliveryNotice: 'Livraison express à domicile ou en point relais dans les 58 Wilayas.',
-      selectVariant: 'Choisir une déclinaison',
-      quantity: 'Quantité',
-      addToBag: 'Ajouter au Panier',
-      expressCod: 'Commander en Express (COD)',
-      freePackaging: 'Écrin de velours & certificat inclus',
-      secureCod: 'Paiement en espèces à la livraison'
-    },
-    cart: {
-      title: 'Votre Écrin de Sélection',
-      empty: 'Votre panier est vide',
-      emptySub: 'Découvrez nos pièces signatures et sublimez votre allure.',
-      subtotal: 'Sous-total',
-      shipping: 'Livraison 58 Wilayas',
-      total: 'Total à régler à la livraison',
-      checkout: 'Finaliser la Commande COD',
-      continueShopping: 'Poursuivre la sélection',
-      quantity: 'Quantité',
-      remove: 'Retirer',
-      freeShippingNotice: 'Règlement en espèces à la réception de votre colis.'
-    },
-    checkout: {
-      title: 'Validation de Commande COD',
-      subtitle: 'Paiement en espèces à la livraison partout en Algérie',
-      fullName: 'Nom & Prénom',
-      phone: 'Numéro de Téléphone (Confirmation)',
-      wilaya: 'Wilaya de Livraison (58)',
-      commune: 'Commune',
-      address: 'Adresse de livraison détaillée',
-      deliveryMethod: 'Mode d’Expédition',
-      domicile: 'Livraison à Domicile',
-      stopDesk: 'Point Relais (Stop Desk)',
-      paymentNotice: 'Vous ne payez rien maintenant. Le règlement se fait en dinars lors de la remise en main propre.',
-      placeOrder: 'Confirmer ma Commande COD',
-      orderSummary: 'Récapitulatif de votre commande',
-      successTitle: 'Commande Confirmée !',
-      successMessage: 'Votre commande a été enregistrée. Notre service client vous contactera par téléphone pour validation.'
-    },
-    trust: {
-      paymentOnDelivery: 'Paiement à la Livraison',
-      paymentOnDeliverySub: 'Réglez en toute sérénité à la réception de votre bijou.',
-      wilayasShipping: 'Livraison 58 Wilayas',
-      wilayasShippingSub: 'Expédition rapide sous 24 à 72 heures.',
-      velvetPackaging: 'Écrin & Certificat Luxe',
-      velvetPackagingSub: 'Présentation soignée prête à offrir.'
-    },
-    footer: {
-      brandDescription: 'Maison de joaillerie de luxe contemporaine. Précision architecturale et matériaux nobles en Algérie.',
-      explore: 'Explorer',
-      customerCare: 'Service Client',
-      legal: 'Informations Légales',
-      contactUs: 'Nous Contacter',
-      shippingReturns: 'Livraison & Retours',
-      faq: 'Questions Fréquentes',
-      terms: 'Conditions Générales',
-      privacy: 'Politique de Confidentialité',
-      copyright: 'KenDji Luxury. Tous droits réservés.'
-    }
-  },
   ar: {
     common: {
       brandName: 'كندجي للمجوهرات الفاخرة',
@@ -344,6 +267,73 @@ export const TRANSLATIONS: Record<Locale, Dictionary> = {
       ctaTitle: 'تألقي في كل مناسبة',
       ctaSubtitle: 'اطلبي الآن بكل ثقة مع ميزة الدفع نقداً عند استلام طلبيتك.',
       ctaButton: 'زيارة المتجر'
+    },
+    collectionIntro: {
+      badge: 'عوالم عريقة',
+      title: 'عوالم الجمال والأناقة',
+      subtitle: 'تستكشف كل مجموعة توازناً فريداً بين الشكل والوجدان والحرفية الرفيعة لتألق هادئ ومميز.',
+      exploreUniverse: 'استكشف المجموعة'
+    },
+    editorial: {
+      badge: 'بيان الدار',
+      quote: '«المجوهرات هي الهندسة الصامتة للهوية — خطوط دقيقة تلتقط الضوء في لحظات لا تُنسى.»',
+      f1: 'هندسة معمارية',
+      f2: 'بريق يدوم',
+      f3: 'فخامة هادئة'
+    },
+    categoryEmphasis: {
+      setsBadge: 'طقم متناغم',
+      setsTitle: 'إطلالة متكاملة وتألق متناسق',
+      setsDesc: 'مصممة كبصمة جمالية موحدة حيث تعكس كل قطعة الجوهر الرئيسي للطقم، لتمنحك خيارات إطلالة راقية في المناسبات والأيام المميزة.',
+      necklacesBadge: 'سحر العنق والياقة',
+      necklacesTitle: 'انسيابية راقية على ملامح العنق',
+      necklacesDesc: 'مبتكرة لترتكز بسلاسة على عظام الترقوة مع توازن متقن يضمن بقاء القلادة المركزية متألقة ومستقرة من كل الزوايا.',
+      braceletsBadge: 'أناقة المعصم',
+      braceletsTitle: 'تصميم يراعي انحناءات المعصم',
+      braceletsDesc: 'مصممة لتنسجم مع الانحناءات الطبيعية للمعصم، لتمنحك راحة تامة وإمكانية دمجها بسلاسة مع الأساور والساعات.',
+      watchesBadge: 'ساعات فاخرة',
+      watchesTitle: 'إطار جوهري بدقة عالية',
+      watchesDesc: 'تجمع بين جماليات المجوهرات وتفاصيل صناعة الساعات الكلاسيكية، بإطار مرصع وسوار فاخر مريح.',
+      ringsBadge: 'خواتم وسوليتير',
+      ringsTitle: 'تناسب بدقة وتألق ساحر',
+      ringsDesc: 'مصممة لراحة حركة الأصابع مع لمسات داخلية ناعمة وإطار يبرز بريق الأحجار.'
+    },
+    productStory: {
+      badge: 'رؤية التصميم',
+      title: 'صنعت بأبعاد دقيقة ومتقنة.',
+      quote: '«تم تصميم كل زاوية لتوازن بين وزن المعدن وانعكاس الضوء الساحر.»',
+      signatureLabel: 'بصمة التصميم:',
+      finishLabel: 'الطلاء واللمعان:',
+      notice: 'صنعت بعناية حرفية فائقة، وتصلك داخل علبة فاخرة مصممة لحفظها، مرفقة بتوصيات العناية للحفاظ على بريقها الخالد.'
+    },
+    productDetails: {
+      badge: 'المواصفات الفنية',
+      title: 'تفاصيل المنتج المعتمدة',
+      ref: 'رمز القطعة',
+      category: 'التصنيف',
+      collection: 'المجموعة',
+      pieces: 'عدد القطع',
+      finish: 'طلاء المعدن',
+      stones: 'الأحجار والتطعيمات',
+      paymentMethod: 'طريقة الدفع',
+      paymentMethodVal: 'الدفع نقداً عند الاستلام ومعاينة الطرد',
+      territory: 'نطاق التوصيل',
+      territoryVal: 'توصيل للمنزل أو المكتب عبر 58 ولاية جزائرية',
+      care: 'إرشادات الحفظ',
+      careVal: 'يحفظ في العلبة المخملية الأصلية، ويفضل تجنب الملامسة المباشرة للعطور والمواد الكيميائية.'
+    },
+    relatedProducts: {
+      badge: 'تناغم مميز',
+      title: 'أكملي إطلالتك',
+      exploreCollection: 'استكشف مجموعة'
+    },
+    productFinalCta: {
+      badge: 'متجر دار كندجي',
+      titleLine1: 'تألقي بأنوثة',
+      titleLine2: 'وجاذبية خالدة.',
+      desc: 'اطلبي القطعة اليوم وتصلي بعلبة مخملية فاخرة مع ميزة الدفع عند الاستلام في الجزائر.',
+      orderNow: 'اطلبي الآن',
+      viewCollection: 'عرض المجموعة'
     },
     categories: {
       sets: 'أطقم مجوهرات فاخرة',
@@ -434,6 +424,217 @@ export const TRANSLATIONS: Record<Locale, Dictionary> = {
       copyright: 'كندجي للمجوهرات الفاخرة. جميع الحقوق محفوظة.'
     }
   },
+  fr: {
+    common: {
+      brandName: 'KenDji Luxury',
+      currency: 'Dinar Algérien',
+      currencySymbol: 'DA',
+      codBadge: 'Paiement à la Livraison 58 Wilayas',
+      deliveryGuarantee: 'Livraison express sécurisée en Algérie',
+      shopNow: 'Explorer la Collection',
+      viewAll: 'Voir toutes les créations',
+      details: 'Voir les détails',
+      addToCart: 'Ajouter au Panier',
+      orderNow: 'Commander en 1 Clic (COD)',
+      buyNow: 'Acheter Maintenant',
+      contactUs: 'Contactez-nous',
+      back: 'Retour',
+      save: 'Enregistrer',
+      cancel: 'Annuler',
+      loading: 'Chargement...',
+      success: 'Opération réussie',
+      error: 'Une erreur est survenue'
+    },
+    nav: {
+      home: 'Accueil',
+      shop: 'Boutique',
+      categories: 'Catégories',
+      collections: 'Collections',
+      about: 'Maison KenDji',
+      contact: 'Contact',
+      cart: 'Panier',
+      search: 'Recherche'
+    },
+    hero: {
+      badge: 'KenDji Luxury • Haute Joaillerie',
+      headline: 'L’Architecture de l’Intimité.',
+      subheadline: 'Une joaillerie d’exception conçue avec une précision architecturale. Des créations précieuses pensées comme des emblèmes d’élégance intemporelle.',
+      ctaPrimary: 'Explorer la Collection',
+      ctaSecondary: 'Découvrir les Univers',
+      signatureSelection: 'Sélection Signature'
+    },
+    home: {
+      featuredBadge: 'Sélection Exclusive',
+      featuredTitle: 'Créations Emblématiques',
+      featuredSubtitle: 'Des pièces maîtresses alliant finitions dorées, nacre et pierres éclatantes.',
+      worldsBadge: 'Univers KenDji',
+      worldsTitle: 'Explorez nos Collections',
+      worldsSubtitle: 'Plongez dans des récits joailliers uniques, du romantisme botanique à l’audace contemporaine.',
+      storyBadge: 'Notre Philosophie',
+      storyTitle: 'La Maison KenDji',
+      storyP1: 'Née d’une passion pour la pureté des lignes et l’artisanat d’art, KenDji Luxury réinvente le bijou comme une signature personnelle.',
+      storyP2: 'Chaque création est livrée dans son écrin de velours avec son certificat d’authenticité partout en Algérie.',
+      storyCta: 'Découvrir nos créations',
+      ctaTitle: 'Sublimez Chaque Instant',
+      ctaSubtitle: 'Commandez en toute sérénité avec le paiement en espèces à la livraison.',
+      ctaButton: 'Accéder à la Boutique'
+    },
+    collectionIntro: {
+      badge: 'Curated Worlds',
+      title: 'Univers Esthétiques',
+      subtitle: 'Chaque collection explore un équilibre unique de forme, de sentiment et de savoir-faire.',
+      exploreUniverse: 'Explorer l’Univers'
+    },
+    editorial: {
+      badge: 'Éditorial Signature',
+      quote: '«Le bijou est la géométrie silencieuse de l’identité — des lignes subtiles captant la lumière dans des moments inoubliables.»',
+      f1: 'Forme Architecturale',
+      f2: 'Éclat Durable',
+      f3: 'Luxe Subtil'
+    },
+    categoryEmphasis: {
+      setsBadge: 'Parure Harmonieuse',
+      setsTitle: 'Silhouette Coordonnée & Look Complet',
+      setsDesc: 'Conçu comme un ensemble esthétique intégré où chaque pièce fait écho au motif central.',
+      necklacesBadge: 'Port & Décolleté',
+      necklacesTitle: 'Encadrement du Décolleté & Drapé Sculptural',
+      necklacesDesc: 'Conçu pour se poser avec grâce le long de la clavicule avec une tension de chaîne équilibrée.',
+      braceletsBadge: 'Poignet & Stacking',
+      braceletsTitle: 'Ergonomie du Poignet & Polyvalence de Stacking',
+      braceletsDesc: 'Courbé pour suivre les contours naturels du poignet avec un profil confortable.',
+      watchesBadge: 'Horlogerie & Précision',
+      watchesTitle: 'Lunette Architecturale & Éclat Bicolore',
+      watchesDesc: 'Alliant l’esthétique joaillère aux détails horlogers classiques avec lunette sertie.',
+      ringsBadge: 'Bague & Silhouette',
+      ringsTitle: 'Proportions de l’Anneau & Présence Solitaire',
+      ringsDesc: 'Conçu pour une articulation confortable des doigts avec des profils intérieurs doux.'
+    },
+    productStory: {
+      badge: 'Design Insight',
+      title: 'Conçu avec une Proportion Réfléchie.',
+      quote: '«Chaque angle est façonné pour équilibrer le poids métallique et la réflexion de la lumière.»',
+      signatureLabel: 'Signature Visuelle :',
+      finishLabel: 'Finition & Texture :',
+      notice: 'Fabriqué avec un soin artisanal, livré dans son packaging cadeau sur mesure.'
+    },
+    productDetails: {
+      badge: 'Spécifications',
+      title: 'Détails du Produit Vérifiés',
+      ref: 'Référence Produit',
+      category: 'Catégorie',
+      collection: 'Collection',
+      pieces: 'Pièces Incluses',
+      finish: 'Finition Métallique',
+      stones: 'Pierres & Incrustations',
+      paymentMethod: 'Mode de Règlement',
+      paymentMethodVal: 'Paiement en espèces à la livraison (Cash on Delivery)',
+      territory: 'Territoire de Livraison',
+      territoryVal: 'Livraison à domicile ou point relais partout en Algérie',
+      care: 'Conseils d’Entretien',
+      careVal: 'Conserver dans son écrin d’origine. Éviter le contact prolongé avec parfums et produits chimiques.'
+    },
+    relatedProducts: {
+      badge: 'Harmonies Rapprochées',
+      title: 'Compléter le Look',
+      exploreCollection: 'Explorer la Collection'
+    },
+    productFinalCta: {
+      badge: 'Boutique KenDji',
+      titleLine1: 'Adornez-vous d’une',
+      titleLine2: 'Distinction Durable.',
+      desc: 'Commandez votre bijou aujourd’hui. Recevez votre coffret sur mesure et réglez à la livraison en Algérie.',
+      orderNow: 'Commander Maintenant',
+      viewCollection: 'Voir la Collection'
+    },
+    categories: {
+      sets: 'Parures & Ensembles',
+      necklaces: 'Colliers & Pendentifs',
+      bracelets: 'Bracelets & Joncs',
+      rings: 'Bagues & Solitaires',
+      watches: 'Montres Joaillières',
+      all: 'Toutes les créations'
+    },
+    catalog: {
+      allCategories: 'Toutes les catégories',
+      allCollections: 'Toutes les collections',
+      filterCategory: 'Catégorie',
+      filterCollection: 'Collection',
+      sortBy: 'Trier par',
+      sortDefault: 'Par défaut',
+      sortPriceAsc: 'Prix croissant',
+      sortPriceDesc: 'Prix décroissant',
+      resultsCount: 'pièces trouvées',
+      noProducts: 'Aucun bijou trouvé dans cette sélection.',
+      viewDetails: 'Découvrir'
+    },
+    product: {
+      inStock: 'En Stock • Expédition Immédiate',
+      outOfStock: 'Victime de son succès',
+      material: 'Matériau d’Exception',
+      finish: 'Finition Métallique',
+      stones: 'Pierres & Nacre',
+      dimensions: 'Dimensions',
+      piecesIncluded: 'Pièces Incluses',
+      care: 'Conseils d’Entretien',
+      deliveryNotice: 'Livraison express à domicile ou en point relais dans les 58 Wilayas.',
+      selectVariant: 'Choisir une déclinaison',
+      quantity: 'Quantité',
+      addToBag: 'Ajouter au Panier',
+      expressCod: 'Commander en Express (COD)',
+      freePackaging: 'Écrin de velours & certificat inclus',
+      secureCod: 'Paiement en espèces à la livraison'
+    },
+    cart: {
+      title: 'Votre Écrin de Sélection',
+      empty: 'Votre panier est vide',
+      emptySub: 'Découvrez nos pièces signatures et sublimez votre allure.',
+      subtotal: 'Sous-total',
+      shipping: 'Livraison 58 Wilayas',
+      total: 'Total à régler à la livraison',
+      checkout: 'Finaliser la Commande COD',
+      continueShopping: 'Poursuivre la sélection',
+      quantity: 'Quantité',
+      remove: 'Retirer',
+      freeShippingNotice: 'Règlement en espèces à la réception de votre colis.'
+    },
+    checkout: {
+      title: 'Validation de Commande COD',
+      subtitle: 'Paiement en espèces à la livraison partout en Algérie',
+      fullName: 'Nom & Prénom',
+      phone: 'Numéro de Téléphone (Confirmation)',
+      wilaya: 'Wilaya de Livraison (58)',
+      commune: 'Commune',
+      address: 'Adresse de livraison détaillée',
+      deliveryMethod: 'Mode d’Expédition',
+      domicile: 'Livraison à Domicile',
+      stopDesk: 'Point Relais (Stop Desk)',
+      paymentNotice: 'Vous ne payez rien maintenant. Le règlement se fait en dinars lors de la remise en main propre.',
+      placeOrder: 'Confirmer ma Commande COD',
+      orderSummary: 'Récapitulatif de votre commande',
+      successTitle: 'Commande Confirmée !',
+      successMessage: 'Votre commande a été enregistrée. Notre service client vous contactera par téléphone pour validation.'
+    },
+    trust: {
+      paymentOnDelivery: 'Paiement à la Livraison',
+      paymentOnDeliverySub: 'Réglez en toute sérénité à la réception de votre bijou.',
+      wilayasShipping: 'Livraison 58 Wilayas',
+      wilayasShippingSub: 'Expédition rapide sous 24 à 72 heures.',
+      velvetPackaging: 'Écrin & Certificat Luxe',
+      velvetPackagingSub: 'Présentation soignée prête à offrir.'
+    },
+    footer: {
+      brandDescription: 'Maison de joaillerie de luxe contemporaine. Précision architecturale et matériaux nobles en Algérie.',
+      explore: 'Explorer',
+      customerCare: 'Service Client',
+      legal: 'Informations Légales',
+      contactUs: 'Nous Contacter',
+      shippingReturns: 'Livraison & Retours',
+      faq: 'Questions Fréquentes',
+      terms: 'Conditions Générales',
+      privacy: 'Politique de Confidentialité',
+      copyright: 'KenDji Luxury. Tous droits réservés.'
+    }
+  },
   en: {
     common: {
       brandName: 'KenDji Luxury',
@@ -488,6 +689,73 @@ export const TRANSLATIONS: Record<Locale, Dictionary> = {
       ctaTitle: 'Elevate Every Moment',
       ctaSubtitle: 'Order with total peace of mind using cash on delivery across Algeria.',
       ctaButton: 'Enter the Boutique'
+    },
+    collectionIntro: {
+      badge: 'Curated Worlds',
+      title: 'Aesthetic Universes',
+      subtitle: 'Each collection explores a unique balance of form, sentiment, and craftsmanship.',
+      exploreUniverse: 'Explore Universe'
+    },
+    editorial: {
+      badge: 'Editorial Statement',
+      quote: '“Jewelry is the silent geometry of identity—subtle lines catching light in unforgettable moments.”',
+      f1: 'Architectural Form',
+      f2: 'Enduring Finish',
+      f3: 'Subtle Luxury'
+    },
+    categoryEmphasis: {
+      setsBadge: 'Harmonious Parure',
+      setsTitle: 'Complete Look & Coordinated Silhouette',
+      setsDesc: 'Designed as an integrated aesthetic suite where each piece echoes the central motif.',
+      necklacesBadge: 'Port & Décolleté',
+      necklacesTitle: 'Neckline Framing & Sculptural Drape',
+      necklacesDesc: 'Engineered to sit gracefully along the collarbone with balanced chain tension.',
+      braceletsBadge: 'Wrist & Stacking',
+      braceletsTitle: 'Wrist Ergonomics & Stacking Versatility',
+      braceletsDesc: 'Curved to follow the natural contours of the wrist with a comfortable profile.',
+      watchesBadge: 'Horlogerie & Precision',
+      watchesTitle: 'Architectural Bezel & Two-Tone Fluidity',
+      watchesDesc: 'Combining jewelry aesthetics with classic horological detailing.',
+      ringsBadge: 'Ring & Silhouette',
+      ringsTitle: 'Band Proportions & Solitaire Presence',
+      ringsDesc: 'Designed for comfortable finger articulation with smooth inner profiling.'
+    },
+    productStory: {
+      badge: 'Design Insight',
+      title: 'Crafted with Deliberate Proportion.',
+      quote: '“Every angle is shaped to balance metallic weight with delicate light reflection.”',
+      signatureLabel: 'Design Signature:',
+      finishLabel: 'Finishing & Texture:',
+      notice: 'Handled with artisanal care, delivered in protective custom gift packaging.'
+    },
+    productDetails: {
+      badge: 'Specifications',
+      title: 'Verified Product Details',
+      ref: 'Product Reference',
+      category: 'Category',
+      collection: 'Collection Universe',
+      pieces: 'Pieces Included',
+      finish: 'Metallic Finish',
+      stones: 'Stones & Inlays',
+      paymentMethod: 'Payment Method',
+      paymentMethodVal: 'Cash on Delivery (COD)',
+      territory: 'Delivery Territory',
+      territoryVal: 'Doorstep or pickup point delivery across Algeria',
+      care: 'Care Recommendations',
+      careVal: 'Store in its original velvet case. Avoid prolonged contact with perfumes and chemicals.'
+    },
+    relatedProducts: {
+      badge: 'Curated Harmonies',
+      title: 'Complete the Look',
+      exploreCollection: 'Explore Collection'
+    },
+    productFinalCta: {
+      badge: 'KenDji Boutique',
+      titleLine1: 'Adorn Yourself with',
+      titleLine2: 'Lasting Distinction.',
+      desc: 'Order today. Receive your bespoke gift box and pay upon delivery in Algeria.',
+      orderNow: 'Order Now',
+      viewCollection: 'View Collection'
     },
     categories: {
       sets: 'Jewelry Sets',
@@ -580,10 +848,10 @@ export const TRANSLATIONS: Record<Locale, Dictionary> = {
   }
 }
 
-export function getDictionary(locale: Locale = 'fr'): Dictionary {
-  return TRANSLATIONS[locale] || TRANSLATIONS.fr
+export function getDictionary(locale: Locale = 'ar'): Dictionary {
+  return TRANSLATIONS[locale] || TRANSLATIONS.ar
 }
 
-export function getDirection(locale: Locale = 'fr'): 'rtl' | 'ltr' {
+export function getDirection(locale: Locale = 'ar'): 'rtl' | 'ltr' {
   return locale === 'ar' ? 'rtl' : 'ltr'
 }

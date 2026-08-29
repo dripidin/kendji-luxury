@@ -20,7 +20,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     setIsOpen(false)
   }
 
-  const current = LANGUAGES.find(l => l.code === locale) || LANGUAGES[1]
+  const current = LANGUAGES.find(l => l.code === locale) || LANGUAGES[0]
 
   return (
     <div className={`relative inline-block text-left ${className || ''}`}>

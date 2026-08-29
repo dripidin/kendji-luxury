@@ -1,26 +1,30 @@
+'use client'
+
 import Link from "next/link"
 import Image from "next/image"
 import { Container, Section } from "@/components/storefront/layout/container"
 import { getCollections } from "@/lib/catalog"
+import { useI18n } from "@/lib/i18n/context"
 
 export function CollectionIntro() {
   const collections = getCollections()
+  const { t, dir } = useI18n()
 
   return (
-    <Section className="bg-[#F9F9F7] text-[#1A1A1A]">
+    <Section className="bg-[#F9F9F7] text-[#1A1A1A]" dir={dir}>
       <Container>
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 pb-6 border-b border-[#1A1A1A]/10 gap-6">
           <div>
             <span className="text-[11px] uppercase tracking-[0.3em] text-[#1A1A1A]/60 font-sans block mb-2">
-              Curated Worlds
+              {t.collectionIntro?.badge || 'عوالم عريقة'}
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight">
-              Aesthetic Universes
+              {t.collectionIntro?.title || 'عوالم الجمال والأناقة'}
             </h2>
           </div>
           <p className="text-sm text-[#1A1A1A]/70 max-w-md font-sans leading-relaxed">
-            Each collection explores a unique balance of form, sentiment, and craftsmanship—designed to be worn in quiet distinction.
+            {t.collectionIntro?.subtitle || 'تستكشف كل مجموعة توازناً فريداً بين الشكل والوجدان والحرفية الرفيعة لتألق هادئ ومميز.'}
           </p>
         </div>
 
@@ -56,8 +60,8 @@ export function CollectionIntro() {
                   {col.description}
                 </p>
                 <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] font-medium text-[#1A1A1A] group-hover:translate-x-1 transition-transform">
-                  <span>Explore Universe</span>
-                  <span>&rarr;</span>
+                  <span>{t.collectionIntro?.exploreUniverse || 'استكشف المجموعة'}</span>
+                  <span>{dir === 'rtl' ? '←' : '→'}</span>
                 </div>
               </div>
             </Link>

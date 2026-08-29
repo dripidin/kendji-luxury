@@ -16,8 +16,8 @@ const I18nContext = createContext<I18nContextType | null>(null)
 const STORAGE_KEY = 'kendji_locale'
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  // Always initialize to 'fr' initially so server-side render matches client first pass
-  const [locale, setLocaleState] = useState<Locale>('fr')
+  // Always initialize to 'ar' initially as official site language
+  const [locale, setLocaleState] = useState<Locale>('ar')
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
@@ -28,8 +28,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       document.documentElement.lang = saved
       document.documentElement.dir = getDirection(saved)
     } else {
-      document.documentElement.lang = 'fr'
-      document.documentElement.dir = 'ltr'
+      document.documentElement.lang = 'ar'
+      document.documentElement.dir = 'rtl'
     }
   }, [])
 
@@ -56,12 +56,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 export function useI18n() {
   const context = useContext(I18nContext)
   if (!context) {
-    const fallbackT = getDictionary('fr')
+    const fallbackT = getDictionary('ar')
     return {
-      locale: 'fr' as Locale,
+      locale: 'ar' as Locale,
       setLocale: () => {},
       t: fallbackT,
-      dir: 'ltr' as const,
+      dir: 'rtl' as const,
       isMounted: false
     }
   }
