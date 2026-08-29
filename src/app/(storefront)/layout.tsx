@@ -3,8 +3,11 @@ import { StorefrontFooter } from "@/components/storefront/layout/footer"
 import { CartProvider } from "@/lib/cart/cart-context"
 import { I18nProvider } from "@/lib/i18n/context"
 import { CartDrawer } from "@/components/storefront/cart/cart-drawer"
+import { getGlobalSettings } from "@/lib/settings"
 
-export default function StorefrontLayout({ children }: { children: React.ReactNode }) {
+export default async function StorefrontLayout({ children }: { children: React.ReactNode }) {
+  const settings = await getGlobalSettings()
+
   return (
     <I18nProvider>
       <CartProvider>
@@ -13,7 +16,7 @@ export default function StorefrontLayout({ children }: { children: React.ReactNo
           <main className="flex-1">
             {children}
           </main>
-          <StorefrontFooter />
+          <StorefrontFooter settings={settings} />
           <CartDrawer />
         </div>
       </CartProvider>
