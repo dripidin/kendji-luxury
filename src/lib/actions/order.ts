@@ -230,7 +230,10 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
               const credentials = {
                 apiId: courierCfg.api_id || '',
                 apiToken: courierCfg.api_token || '',
-                apiKey: courierCfg.api_key || ''
+                apiKey: courierCfg.api_key || '',
+                token: courierCfg.api_token || courierCfg.api_key || '',
+                baseUrl: courierCfg.base_url || 'https://app.ecotrack.dz',
+                base_url: courierCfg.base_url || 'https://app.ecotrack.dz'
               }
               const courier = getActiveCourierProvider(courierCfg.active_provider, credentials)
               const shipResult = await courier.createShipment({

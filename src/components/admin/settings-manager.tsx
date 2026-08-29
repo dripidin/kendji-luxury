@@ -158,7 +158,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
     const res = await testCourierConnectionAction(courier.active_provider, {
       apiId: courier.api_id,
       apiToken: courier.api_token,
-      apiKey: courier.api_key
+      apiKey: courier.api_key,
+      baseUrl: courier.base_url
     })
     setIsTestingCourier(false)
     setCourierTestResult({
@@ -628,34 +629,70 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
 
             {/* API Credentials inputs */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
-              <div className="space-y-2">
-                <Label htmlFor="courier-id">
-                  {courier.active_provider === 'YALIDINE' ? 'API ID / X-User-Id' : 'Identifiant Compte / User'}
-                </Label>
-                <Input
-                  id="courier-id"
-                  placeholder="Ex: 12345678"
-                  value={courier.api_id || ''}
-                  onChange={e => setCourier({ ...courier, api_id: e.target.value })}
-                />
-              </div>
+              {courier.active_provider === 'ECOTRACK' ? (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="courier-base-url">URL de votre Plateforme Ecotrack (Tenant URL)</Label>
+                    <Input
+                      id="courier-base-url"
+                      placeholder="https://app.ecotrack.dz ou https://redex.ecotrack.dz"
+                      value={courier.base_url || ''}
+                      onChange={e => setCourier({ ...courier, base_url: e.target.value })}
+                    />
+                    <p className="text-[11px] text-gray-500">
+                      L&apos;URL de votre espace client Ecotrack (ex: <code>https://app.ecotrack.dz</code>, <code>https://redex.ecotrack.dz</code>, <code>https://platform.dhd-dz.com</code>).
+                    </p>
+                  </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="courier-token">
-                  {courier.active_provider === 'YALIDINE' ? 'API Token / X-User-Token' : 'Clé API / Token'}
-                  {courier.api_key_configured && <span className="text-emerald-600 text-xs ml-1.5">(Enregistré)</span>}
-                </Label>
-                <Input
-                  id="courier-token"
-                  type="password"
-                  placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Saisir la clé / token API...'}
-                  value={courier.api_token || courier.api_key || ''}
-                  onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
-                />
-                <p className="text-[11px] text-gray-500">
-                  Laissez vide pour conserver les clés sécurisées actuellement enregistrées.
-                </p>
-              </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="courier-token">
+                      Token API Ecotrack (Bearer Token)
+                      {courier.api_key_configured && <span className="text-emerald-600 text-xs ml-1.5">(Enregistré)</span>}
+                    </Label>
+                    <Input
+                      id="courier-token"
+                      type="password"
+                      placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Collez votre Token API Ecotrack...'}
+                      value={courier.api_token || courier.api_key || ''}
+                      onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
+                    />
+                    <p className="text-[11px] text-gray-500">
+                      Généré dans votre espace Ecotrack &gt; Paramètres &gt; API Public.
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="courier-id">
+                      {courier.active_provider === 'YALIDINE' ? 'API ID / X-User-Id' : 'Identifiant Compte / User'}
+                    </Label>
+                    <Input
+                      id="courier-id"
+                      placeholder="Ex: 12345678"
+                      value={courier.api_id || ''}
+                      onChange={e => setCourier({ ...courier, api_id: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="courier-token">
+                      {courier.active_provider === 'YALIDINE' ? 'API Token / X-User-Token' : 'Clé API / Token'}
+                      {courier.api_key_configured && <span className="text-emerald-600 text-xs ml-1.5">(Enregistré)</span>}
+                    </Label>
+                    <Input
+                      id="courier-token"
+                      type="password"
+                      placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Saisir la clé / token API...'}
+                      value={courier.api_token || courier.api_key || ''}
+                      onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
+                    />
+                    <p className="text-[11px] text-gray-500">
+                      Laissez vide pour conserver les clés sécurisées actuellement enregistrées.
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 space-y-3">

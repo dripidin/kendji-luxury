@@ -12,6 +12,7 @@ import {
   LocalizationSettings
 } from '@/lib/settings'
 import { normalizeTelegramTarget, autoDetectBotChats } from '@/lib/notifications/telegram'
+import { EcotrackCourierAdapter } from '@/lib/courier/adapters/ecotrack-adapter'
 
 function safeRevalidate(path: string) {
   try {
@@ -140,6 +141,7 @@ export async function saveCourierSettingsAction(data: CourierSettings) {
             api_id: data.api_id || existingCourier.api_id || '',
             api_token: tokenToSave,
             api_key: keyToSave,
+            base_url: data.base_url || existingCourier.base_url || 'https://app.ecotrack.dz',
             origin_wilaya: data.origin_wilaya || 16
           }
         },
@@ -265,19 +267,38 @@ export async function saveLocalizationSettingsAction(data: LocalizationSettings)
 }
 
 /**
- * Safe Test Courier Connection Ping (validates against freeship gateway / courier health)
+ * Safe Test Courier Connection Ping (validates against Ecotrack or freeship gateway / courier health)
  */
 export async function testCourierConnectionAction(
   provider: string,
-  credentials?: { apiId?: string; apiToken?: string; apiKey?: string }
-) {
-  const supported = ['YALIDINE', 'ECOTRACK', 'ZR_EXPRESS', 'MAYSTRO', 'NOEST']
-  if (!supported.includes(provider.toUpperCase())) {
+  credentials?: { apiId?: string; apiToken?: string; apiKey?: string; baseUrl?: string }
+): Promise<{ success: boolean; message?: string; error?: string }> {
+  const code = provider.toUpperCase()
+  const supported = ['YALIDINE', 'ECOTRACK', 'ZR_EXPRESS', 'MAYSTRO', 'NOEST', 'REDEX']
+  if (!supported.includes(code)) {
     return { success: false, error: `Transporteur inconnu : ${provider}` }
   }
 
   try {
-    // Check freeship gateway liveness
+    const supabase = createAdminClient()
+    const { data: current } = await supabase
+      .from('site_settings')
+      .select('integrations')
+      .eq('id', 1)
+      .single()
+
+    const savedCourier = current?.integrations?.courier || {}
+
+    // 1. If Ecotrack: run real live test against Ecotrack API
+    if (code === 'ECOTRACK' || code === 'REDEX') {
+      const token = credentials?.apiKey || credentials?.apiToken || savedCourier.api_token || savedCourier.api_key || process.env.ECOTRACK_API_KEY
+      const baseUrl = credentials?.baseUrl || savedCourier.base_url || 'https://app.ecotrack.dz'
+      
+      const adapter = new EcotrackCourierAdapter({ token, baseUrl })
+      return await adapter.testConnection()
+    }
+
+    // 2. For other providers: verify freeship gateway
     const res = await fetch('https://freeship.dzbuild.com/health', {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' }
@@ -289,8 +310,9 @@ export async function testCourierConnectionAction(
         message: `Passerelle logistique ${provider} opérationnelle. Prêt pour l'émission des bordereaux.`
       }
     }
-  } catch {
-    // Fallback verification
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: `Échec du test de connexion : ${msg}` }
   }
 
   return {

@@ -7,6 +7,7 @@ import { MockCourierAdapter } from "./adapters/mock-adapter";
 import { YalidineCourierAdapter } from "./adapters/yalidine-adapter";
 import { ZrExpressCourierAdapter } from "./adapters/zr-express-adapter";
 import { DzshipUniversalAdapter } from "./adapters/dzship-adapter";
+import { EcotrackCourierAdapter } from "./adapters/ecotrack-adapter";
 
 // Singleton instances
 const mockProvider = new MockCourierAdapter();
@@ -25,7 +26,7 @@ export function getActiveCourierProvider(
   switch (code) {
     case "ECOTRACK":
     case "REDEX":
-      return new DzshipUniversalAdapter("ecotrack", credentials);
+      return new EcotrackCourierAdapter(credentials);
 
     case "MAYSTRO":
       return new DzshipUniversalAdapter("maystro", credentials);

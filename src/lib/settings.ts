@@ -30,6 +30,7 @@ export interface CourierSettings {
   api_id?: string
   api_token?: string
   api_key?: string
+  base_url?: string
   origin_wilaya?: number
   api_key_configured?: boolean
 }
@@ -97,6 +98,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
     active_provider: 'YALIDINE',
     enabled: true,
     api_id: '',
+    base_url: 'https://app.ecotrack.dz',
     origin_wilaya: 16,
     api_key_configured: false
   },
@@ -174,6 +176,7 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
           api_id: courierData.api_id || '',
           api_token: unmaskSecrets ? courierData.api_token : undefined,
           api_key: unmaskSecrets ? courierData.api_key : undefined,
+          base_url: courierData.base_url || 'https://app.ecotrack.dz',
           origin_wilaya: courierData.origin_wilaya || 16,
           api_key_configured: Boolean(courierData.api_token || courierData.api_key || process.env.YALIDINE_API_KEY || process.env.ECOTRACK_API_KEY)
         },
