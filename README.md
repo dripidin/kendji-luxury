@@ -132,9 +132,12 @@ npm run build
 
 ---
 
-## 🚢 Deployment (Vercel)
+## 🚢 Deployment & Production Operations
 
-1. Connect repository to Vercel.
-2. Ensure framework preset is set to **Next.js**.
-3. Set the production environment variables from `.env.example`.
-4. Deploy with `npm run build`.
+Full deployment procedures, Supabase PostgreSQL schema mapping, and Vercel hosting guides are available in [`docs/deployment.md`](./docs/deployment.md).
+
+### Quick Deploy Checklist
+1. **GitHub Remote:** Ensure all commits are pushed to `main` on [https://github.com/dripidin/kendji-luxury](https://github.com/dripidin/kendji-luxury).
+2. **Supabase Cloud:** Ensure the PostgreSQL database project is linked and migrations are applied.
+3. **Vercel Project:** Configure the production environment variables outlined in `.env.example`.
+4. **Verification:** Run all test suites: `npx tsx scripts/test_operations_and_courier.ts` and verify build via `npm run build`.
