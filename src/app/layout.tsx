@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bodoni_Moda, Montserrat } from "next/font/google";
+import { Bodoni_Moda, Montserrat, Tajawal } from "next/font/google";
 import "./globals.css";
 
 const bodoniModa = Bodoni_Moda({
@@ -11,6 +11,13 @@ const bodoniModa = Bodoni_Moda({
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const tajawal = Tajawal({
+  variable: "--font-tajawal",
+  subsets: ["arabic"],
+  weight: ["300", "400", "500", "700", "800"],
   display: "swap",
 });
 
@@ -112,7 +119,7 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`${bodoniModa.variable} ${montserrat.variable} h-full antialiased`}
+      className={`${bodoniModa.variable} ${montserrat.variable} ${tajawal.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-ivory text-charcoal">{children}</body>
     </html>

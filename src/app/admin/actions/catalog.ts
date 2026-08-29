@@ -380,7 +380,15 @@ export async function createCategory(data: CategoryFormValues) {
   const supabase = createAdminClient()
   const validated = categorySchema.parse(data)
 
-  const { error } = await supabase.from('categories').insert(validated)
+  const payload = {
+    name: validated.name,
+    slug: validated.slug,
+    description: validated.description || null,
+    active: validated.is_active ?? true,
+    display_order: validated.display_order ?? 0
+  }
+
+  const { error } = await supabase.from('categories').insert(payload)
   if (error) return { error: error.message }
   
   safeRevalidatePath('/admin/categories')
@@ -392,7 +400,15 @@ export async function updateCategory(id: string, data: CategoryFormValues) {
   const supabase = createAdminClient()
   const validated = categorySchema.parse(data)
 
-  const { error } = await supabase.from('categories').update(validated).eq('id', id)
+  const payload = {
+    name: validated.name,
+    slug: validated.slug,
+    description: validated.description || null,
+    active: validated.is_active ?? true,
+    display_order: validated.display_order ?? 0
+  }
+
+  const { error } = await supabase.from('categories').update(payload).eq('id', id)
   if (error) return { error: error.message }
 
   safeRevalidatePath('/admin/categories')
@@ -450,7 +466,15 @@ export async function createCollection(data: CollectionFormValues) {
   const supabase = createAdminClient()
   const validated = collectionSchema.parse(data)
 
-  const { error } = await supabase.from('collections').insert(validated)
+  const payload = {
+    name: validated.name,
+    slug: validated.slug,
+    description: validated.description || null,
+    active: validated.is_active ?? true,
+    display_order: validated.display_order ?? 0
+  }
+
+  const { error } = await supabase.from('collections').insert(payload)
   if (error) return { error: error.message }
   
   safeRevalidatePath('/admin/collections')
@@ -462,7 +486,15 @@ export async function updateCollection(id: string, data: CollectionFormValues) {
   const supabase = createAdminClient()
   const validated = collectionSchema.parse(data)
 
-  const { error } = await supabase.from('collections').update(validated).eq('id', id)
+  const payload = {
+    name: validated.name,
+    slug: validated.slug,
+    description: validated.description || null,
+    active: validated.is_active ?? true,
+    display_order: validated.display_order ?? 0
+  }
+
+  const { error } = await supabase.from('collections').update(payload).eq('id', id)
   if (error) return { error: error.message }
 
   safeRevalidatePath('/admin/collections')

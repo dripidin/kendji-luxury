@@ -55,10 +55,10 @@ export function CartDrawer() {
           className="w-screen max-w-md bg-[#F9F9F7] text-[#1A1A1A] border-x border-[#1A1A1A]/10 shadow-2xl flex flex-col justify-between animate-in slide-in-from-right duration-300"
         >
           {/* Header */}
-          <div className="p-6 border-b border-[#1A1A1A]/10 flex items-center justify-between bg-white">
+          <div className="p-4 sm:p-6 border-b border-[#1A1A1A]/10 flex items-center justify-between bg-white">
             <div className="flex items-center gap-3">
               <ShoppingBag size={20} strokeWidth={1.5} />
-              <h2 className="font-serif text-lg font-bold tracking-tight">
+              <h2 className="font-serif text-base sm:text-lg font-bold tracking-tight">
                 {t.cart.title} ({itemCount})
               </h2>
             </div>
@@ -73,7 +73,7 @@ export function CartDrawer() {
           </div>
 
           {/* Cart Items List */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
             {items.length === 0 ? (
               <div className="py-20 text-center space-y-4">
                 <ShoppingBag size={40} strokeWidth={1} className="mx-auto text-[#1A1A1A]/30" />
@@ -95,7 +95,7 @@ export function CartDrawer() {
               items.map((item) => {
                 const lineTotal = `${(item.unitPrice * item.quantity).toLocaleString('fr-FR')} ${t.common.currencySymbol}`
                 return (
-                  <div key={item.key} className="flex gap-4 p-3 bg-white border border-[#1A1A1A]/10">
+                  <div key={item.key} className="flex gap-3 sm:gap-4 p-3 bg-white border border-[#1A1A1A]/10">
                     {/* Thumbnail */}
                     <div className="h-20 w-16 relative bg-[#F2F2EF] shrink-0 border border-[#1A1A1A]/5 overflow-hidden">
                       <Image
@@ -111,7 +111,7 @@ export function CartDrawer() {
                     <div className="flex-1 flex flex-col justify-between min-w-0">
                       <div>
                         <div className="flex justify-between items-start gap-2">
-                          <h4 className="font-serif text-sm font-semibold text-[#1A1A1A] truncate">
+                          <h4 className="font-serif text-xs sm:text-sm font-semibold text-[#1A1A1A] truncate">
                             {item.name}
                           </h4>
                           <button
@@ -131,23 +131,23 @@ export function CartDrawer() {
                         )}
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-[#1A1A1A]/5 mt-2">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#1A1A1A]/5 mt-2">
                         {/* Quantity controls */}
-                        <div className="flex items-center border border-[#1A1A1A]/20 bg-[#F9F9F7] h-8">
+                        <div className="flex items-center border border-[#1A1A1A]/20 bg-[#F9F9F7] h-7 sm:h-8">
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.key, item.quantity - 1)}
-                            className="px-2.5 text-xs text-[#1A1A1A] hover:bg-white"
+                            className="px-2 text-xs text-[#1A1A1A] hover:bg-white"
                           >
                             -
                           </button>
-                          <span className="px-2.5 text-xs font-medium font-sans min-w-[1.5rem] text-center">
+                          <span className="px-2 text-xs font-medium font-sans min-w-[1.2rem] text-center">
                             {item.quantity}
                           </span>
                           <button
                             type="button"
                             onClick={() => updateQuantity(item.key, item.quantity + 1)}
-                            className="px-2.5 text-xs text-[#1A1A1A] hover:bg-white"
+                            className="px-2 text-xs text-[#1A1A1A] hover:bg-white"
                           >
                             +
                           </button>
@@ -166,7 +166,7 @@ export function CartDrawer() {
 
           {/* Footer / Summary */}
           {items.length > 0 && (
-            <div className="p-6 bg-white border-t border-[#1A1A1A]/10 space-y-4">
+            <div className="p-4 sm:p-6 bg-white border-t border-[#1A1A1A]/10 space-y-4">
               <div className="space-y-1.5">
                 <div className="flex justify-between items-baseline">
                   <span className="text-xs uppercase tracking-widest text-[#1A1A1A]/60 font-sans">

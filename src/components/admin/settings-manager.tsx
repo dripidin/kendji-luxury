@@ -317,7 +317,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-gray-200 bg-white px-2 rounded-t-lg overflow-x-auto scrollbar-none">
+      <div className="flex flex-wrap border-b border-gray-200 bg-white p-2 rounded-t-lg gap-1">
         {[
           { id: 'identity', label: '1. Identité & Réseaux', icon: Building },
           { id: 'contact', label: '2. Contact & SAV', icon: ShieldCheck },

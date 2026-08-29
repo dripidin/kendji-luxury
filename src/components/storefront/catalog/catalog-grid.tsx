@@ -84,11 +84,11 @@ export function CatalogGrid({
 
         {/* Category Pills (on Shop All) */}
         {showCategoryFilters && categories.length > 0 && (
-          <div className="flex items-center gap-2 overflow-x-auto pt-8 pb-2 scrollbar-none">
+          <div className="flex flex-wrap items-center gap-2 pt-6 sm:pt-8 pb-2">
             <button
               type="button"
               onClick={() => setSelectedCategory('all')}
-              className={`px-5 py-2.5 rounded-full text-xs uppercase tracking-[0.15em] font-medium transition-all whitespace-nowrap ${
+              className={`px-4 sm:px-5 py-2.5 rounded-full text-xs uppercase tracking-[0.15em] font-medium transition-all ${
                 selectedCategory === 'all'
                   ? 'bg-[#1A1A1A] text-white shadow-sm'
                   : 'bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/80 hover:border-[#1A1A1A]/40'
@@ -103,7 +103,7 @@ export function CatalogGrid({
                   key={cat.slug}
                   type="button"
                   onClick={() => setSelectedCategory(cat.slug)}
-                  className={`px-5 py-2.5 rounded-full text-xs uppercase tracking-[0.15em] font-medium transition-all whitespace-nowrap ${
+                  className={`px-4 sm:px-5 py-2.5 rounded-full text-xs uppercase tracking-[0.15em] font-medium transition-all ${
                     selectedCategory === cat.slug
                       ? 'bg-[#1A1A1A] text-white shadow-sm'
                       : 'bg-white border border-[#1A1A1A]/10 text-[#1A1A1A]/80 hover:border-[#1A1A1A]/40'
