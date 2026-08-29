@@ -44,6 +44,10 @@ next-env.d.ts
 # Misc & OS
 .DS_Store
 Thumbs.db
+*.code-workspace
+.agents/
 
 # Raw Supplier Source Folders
 Kendji Boutique/
+
+.vercel
