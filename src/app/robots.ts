@@ -1,7 +1,10 @@
 import { MetadataRoute } from "next"
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kendji-luxury.dz"
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  const baseUrl = envUrl
+    ? (envUrl.startsWith("http://") || envUrl.startsWith("https://") ? envUrl : `https://${envUrl}`).replace(/\/$/, "")
+    : "https://kendji-luxury.dz";
 
   return {
     rules: [

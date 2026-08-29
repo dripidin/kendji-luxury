@@ -14,7 +14,23 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kendji-luxury.dz";
+function getValidSiteUrl(): URL {
+  const envUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (envUrl) {
+    try {
+      const formatted = envUrl.startsWith("http://") || envUrl.startsWith("https://")
+        ? envUrl
+        : `https://${envUrl}`;
+      return new URL(formatted);
+    } catch {
+      // Ignore parse failure and fallback below
+    }
+  }
+  return new URL("https://kendji-luxury.dz");
+}
+
+const siteUrlObj = getValidSiteUrl();
+const siteUrl = siteUrlObj.origin;
 
 export const viewport: Viewport = {
   themeColor: "#1A1A1A",
@@ -23,7 +39,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: siteUrlObj,
   title: {
     default: "KenDji Luxury • Joaillerie & Parures d'Exception en Algérie",
     template: "%s • KenDji Luxury",

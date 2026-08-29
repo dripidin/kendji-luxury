@@ -1,6 +1,8 @@
 import { AdminSidebar } from '@/components/admin/sidebar'
 import { AdminHeader } from '@/components/admin/header'
 
+export const dynamic = 'force-dynamic'
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-gray-50 font-sans">
