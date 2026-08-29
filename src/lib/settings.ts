@@ -147,19 +147,19 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
 
       return {
         identity: {
-          brand_name: data.brand_name || DEFAULT_GLOBAL_SETTINGS.identity.brand_name,
-          brand_name_ar: data.brand_name_ar || DEFAULT_GLOBAL_SETTINGS.identity.brand_name_ar,
-          contact_email: data.contact_email || DEFAULT_GLOBAL_SETTINGS.identity.contact_email,
-          contact_phone: data.contact_phone || DEFAULT_GLOBAL_SETTINGS.identity.contact_phone,
-          whatsapp: data.whatsapp || DEFAULT_GLOBAL_SETTINGS.identity.whatsapp,
-          instagram: data.social_links?.instagram || DEFAULT_GLOBAL_SETTINGS.identity.instagram,
-          facebook: data.social_links?.facebook || DEFAULT_GLOBAL_SETTINGS.identity.facebook,
-          tiktok: data.social_links?.tiktok || DEFAULT_GLOBAL_SETTINGS.identity.tiktok
+          brand_name: data.brand_name ?? DEFAULT_GLOBAL_SETTINGS.identity.brand_name,
+          brand_name_ar: data.brand_name_ar ?? DEFAULT_GLOBAL_SETTINGS.identity.brand_name_ar,
+          contact_email: data.contact_email ?? DEFAULT_GLOBAL_SETTINGS.identity.contact_email,
+          contact_phone: data.contact_phone ?? DEFAULT_GLOBAL_SETTINGS.identity.contact_phone,
+          whatsapp: data.whatsapp ?? DEFAULT_GLOBAL_SETTINGS.identity.whatsapp,
+          instagram: data.social_links?.instagram ?? '',
+          facebook: data.social_links?.facebook ?? '',
+          tiktok: data.social_links?.tiktok ?? ''
         },
         contact: {
-          customer_service_phone: data.customer_service_phone || DEFAULT_GLOBAL_SETTINGS.contact.customer_service_phone,
-          customer_service_email: data.customer_service_email || DEFAULT_GLOBAL_SETTINGS.contact.customer_service_email,
-          business_address: data.business_address || DEFAULT_GLOBAL_SETTINGS.contact.business_address
+          customer_service_phone: data.customer_service_phone ?? DEFAULT_GLOBAL_SETTINGS.contact.customer_service_phone,
+          customer_service_email: data.customer_service_email ?? DEFAULT_GLOBAL_SETTINGS.contact.customer_service_email,
+          business_address: data.business_address ?? DEFAULT_GLOBAL_SETTINGS.contact.business_address
         },
         currency: {
           code: 'DZD',
@@ -171,7 +171,7 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
           custom_fees: deliverySettings.custom_fees || {}
         },
         courier: {
-          active_provider: courierData.active_provider || 'YALIDINE',
+          active_provider: courierData.active_provider || 'ECOTRACK',
           enabled: courierData.enabled ?? true,
           api_id: courierData.api_id || '',
           api_token: unmaskSecrets ? courierData.api_token : undefined,
@@ -183,7 +183,7 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
         telegram: {
           enabled: integrations.telegram?.enabled ?? false,
           chat_id: integrations.telegram?.chat_id || '',
-          invite_link: integrations.telegram?.invite_link || '',
+          invite_link: integrations.telegram?.invite_link || integrations.telegram?.chat_id || '',
           bot_token: unmaskSecrets ? telegramToken : undefined,
           bot_link: integrations.telegram?.bot_link || DEFAULT_GLOBAL_SETTINGS.telegram.bot_link,
           token_configured: Boolean(telegramToken || process.env.TELEGRAM_BOT_TOKEN),

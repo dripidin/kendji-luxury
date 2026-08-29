@@ -22,25 +22,37 @@ function safeRevalidate(path: string) {
   }
 }
 
+async function updateSettingsInDb(payload: Record<string, unknown>) {
+  const supabase = createAdminClient()
+  const { data: existing } = await supabase.from('site_settings').select('id').eq('id', 1).maybeSingle()
+  if (existing) {
+    return await supabase.from('site_settings').update({
+      ...payload,
+      updated_at: new Date().toISOString()
+    }).eq('id', 1)
+  } else {
+    return await supabase.from('site_settings').insert({
+      id: 1,
+      ...payload,
+      updated_at: new Date().toISOString()
+    })
+  }
+}
+
 export async function saveStoreIdentityAction(data: StoreIdentitySettings) {
   try {
-    const supabase = createAdminClient()
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        brand_name: data.brand_name,
-        brand_name_ar: data.brand_name_ar,
-        contact_email: data.contact_email,
-        contact_phone: data.contact_phone,
-        whatsapp: data.whatsapp,
-        social_links: {
-          instagram: data.instagram,
-          facebook: data.facebook,
-          tiktok: data.tiktok
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error } = await updateSettingsInDb({
+      brand_name: data.brand_name,
+      brand_name_ar: data.brand_name_ar,
+      contact_email: data.contact_email,
+      contact_phone: data.contact_phone,
+      whatsapp: data.whatsapp,
+      social_links: {
+        instagram: data.instagram,
+        facebook: data.facebook,
+        tiktok: data.tiktok
+      }
+    })
 
     if (error) return { success: false, error: error.message }
     safeRevalidate('/admin/settings')
@@ -54,16 +66,11 @@ export async function saveStoreIdentityAction(data: StoreIdentitySettings) {
 
 export async function saveStoreContactAction(data: StoreContactSettings) {
   try {
-    const supabase = createAdminClient()
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        customer_service_phone: data.customer_service_phone,
-        customer_service_email: data.customer_service_email,
-        business_address: data.business_address,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error } = await updateSettingsInDb({
+      customer_service_phone: data.customer_service_phone,
+      customer_service_email: data.customer_service_email,
+      business_address: data.business_address
+    })
 
     if (error) return { success: false, error: error.message }
     safeRevalidate('/admin/settings')
@@ -86,18 +93,13 @@ export async function saveDeliverySettingsAction(data: CodDeliverySettings) {
       }
     }
 
-    const supabase = createAdminClient()
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        delivery_settings: {
-          cod_enabled: data.cod_enabled,
-          default_method: data.default_delivery_method,
-          custom_fees: data.custom_fees
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error } = await updateSettingsInDb({
+      delivery_settings: {
+        cod_enabled: data.cod_enabled,
+        default_method: data.default_delivery_method,
+        custom_fees: data.custom_fees
+      }
+    })
 
     if (error) return { success: false, error: error.message }
     safeRevalidate('/admin/settings')
@@ -187,24 +189,20 @@ export async function saveCourierSettingsAction(data: CourierSettings) {
       ? data.api_key.trim()
       : existingCourier.api_key
 
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        integrations: {
-          ...currentIntegrations,
-          courier: {
-            active_provider: data.active_provider,
-            enabled: data.enabled,
-            api_id: data.api_id || existingCourier.api_id || '',
-            api_token: tokenToSave,
-            api_key: keyToSave,
-            base_url: data.base_url || existingCourier.base_url || 'https://app.ecotrack.dz',
-            origin_wilaya: data.origin_wilaya || 16
-          }
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error } = await updateSettingsInDb({
+      integrations: {
+        ...currentIntegrations,
+        courier: {
+          active_provider: data.active_provider,
+          enabled: data.enabled,
+          api_id: data.api_id || existingCourier.api_id || '',
+          api_token: tokenToSave,
+          api_key: keyToSave,
+          base_url: data.base_url || existingCourier.base_url || 'https://app.ecotrack.dz',
+          origin_wilaya: data.origin_wilaya || 16
+        }
+      }
+    })
 
     if (error) return { success: false, error: error.message }
     safeRevalidate('/admin/settings')
@@ -227,28 +225,23 @@ export async function saveTelegramSettingsAction(data: TelegramSettings) {
     const currentIntegrations = current?.integrations || {}
     const existingTelegram = currentIntegrations.telegram || {}
 
-    // Only update bot_token if provided (to allow keeping existing masked token)
     const tokenToSave = data.bot_token && data.bot_token.trim() !== ''
       ? data.bot_token.trim()
       : existingTelegram.bot_token
 
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        integrations: {
-          ...currentIntegrations,
-          telegram: {
-            enabled: data.enabled,
-            chat_id: data.chat_id,
-            invite_link: data.invite_link || '',
-            bot_token: tokenToSave,
-            bot_link: data.bot_link || 'https://t.me/KendjiLuxuryBot',
-            events: data.events
-          }
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error } = await updateSettingsInDb({
+      integrations: {
+        ...currentIntegrations,
+        telegram: {
+          enabled: data.enabled,
+          chat_id: data.chat_id,
+          invite_link: data.invite_link || data.chat_id || '',
+          bot_token: tokenToSave,
+          bot_link: data.bot_link || 'https://t.me/KendjiLuxuryBot',
+          events: data.events
+        }
+      }
+    })
 
     if (error) return { success: false, error: error.message }
     safeRevalidate('/admin/settings')
@@ -275,21 +268,17 @@ export async function saveMetaSettingsAction(data: MetaSettings) {
       ? data.capi_token.trim()
       : existingMeta.capi_token
 
-    const { error } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        integrations: {
-          ...currentIntegrations,
-          meta: {
-            pixel_id: data.pixel_id,
-            capi_enabled: data.capi_enabled,
-            capi_token: tokenToSave,
-            test_event_code: data.test_event_code || ''
-          }
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error } = await updateSettingsInDb({
+      integrations: {
+        ...currentIntegrations,
+        meta: {
+          pixel_id: data.pixel_id,
+          capi_enabled: data.capi_enabled,
+          capi_token: tokenToSave,
+          test_event_code: data.test_event_code || ''
+        }
+      }
+    })
 
     if (error) return { success: false, error: error.message }
     safeRevalidate('/admin/settings')
@@ -302,17 +291,12 @@ export async function saveMetaSettingsAction(data: MetaSettings) {
 
 export async function saveLocalizationSettingsAction(data: LocalizationSettings) {
   try {
-    const supabase = createAdminClient()
-    const { error: upsertErr } = await supabase
-      .from('site_settings')
-      .upsert({
-        id: 1,
-        localization: {
-          default_language: data.default_language,
-          supported_languages: data.supported_languages
-        },
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'id' })
+    const { error: upsertErr } = await updateSettingsInDb({
+      localization: {
+        default_language: data.default_language,
+        supported_languages: data.supported_languages
+      }
+    })
 
     if (upsertErr) return { success: false, error: upsertErr.message }
     safeRevalidate('/admin/settings')
@@ -320,6 +304,105 @@ export async function saveLocalizationSettingsAction(data: LocalizationSettings)
     return { success: true }
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Erreur localisation'
+    return { success: false, error: msg }
+  }
+}
+
+export async function saveAllSettingsAction(data: {
+  identity: StoreIdentitySettings
+  contact: StoreContactSettings
+  delivery: CodDeliverySettings
+  courier: CourierSettings
+  telegram: TelegramSettings
+  meta: MetaSettings
+  localization: LocalizationSettings
+}) {
+  try {
+    const supabase = createAdminClient()
+    const { data: current } = await supabase
+      .from('site_settings')
+      .select('integrations')
+      .eq('id', 1)
+      .single()
+
+    const currentIntegrations = current?.integrations || {}
+    const existingCourier = currentIntegrations.courier || {}
+    const existingTelegram = currentIntegrations.telegram || {}
+    const existingMeta = currentIntegrations.meta || {}
+
+    const courierToken = data.courier.api_token && data.courier.api_token.trim() !== ''
+      ? data.courier.api_token.trim()
+      : existingCourier.api_token
+
+    const courierKey = data.courier.api_key && data.courier.api_key.trim() !== ''
+      ? data.courier.api_key.trim()
+      : existingCourier.api_key
+
+    const telegramToken = data.telegram.bot_token && data.telegram.bot_token.trim() !== ''
+      ? data.telegram.bot_token.trim()
+      : existingTelegram.bot_token
+
+    const metaToken = data.meta.capi_token && data.meta.capi_token.trim() !== ''
+      ? data.meta.capi_token.trim()
+      : existingMeta.capi_token
+
+    const { error } = await updateSettingsInDb({
+      brand_name: data.identity.brand_name,
+      brand_name_ar: data.identity.brand_name_ar,
+      contact_email: data.identity.contact_email,
+      contact_phone: data.identity.contact_phone,
+      whatsapp: data.identity.whatsapp,
+      social_links: {
+        instagram: data.identity.instagram,
+        facebook: data.identity.facebook,
+        tiktok: data.identity.tiktok
+      },
+      customer_service_phone: data.contact.customer_service_phone,
+      customer_service_email: data.contact.customer_service_email,
+      business_address: data.contact.business_address,
+      delivery_settings: {
+        cod_enabled: data.delivery.cod_enabled,
+        default_method: data.delivery.default_delivery_method,
+        custom_fees: data.delivery.custom_fees
+      },
+      integrations: {
+        courier: {
+          active_provider: data.courier.active_provider,
+          enabled: data.courier.enabled,
+          api_id: data.courier.api_id || existingCourier.api_id || '',
+          api_token: courierToken,
+          api_key: courierKey,
+          base_url: data.courier.base_url || existingCourier.base_url || 'https://app.ecotrack.dz',
+          origin_wilaya: data.courier.origin_wilaya || 16
+        },
+        telegram: {
+          enabled: data.telegram.enabled,
+          chat_id: data.telegram.chat_id,
+          invite_link: data.telegram.invite_link || data.telegram.chat_id || '',
+          bot_token: telegramToken,
+          bot_link: data.telegram.bot_link || 'https://t.me/KendjiLuxuryBot',
+          events: data.telegram.events
+        },
+        meta: {
+          pixel_id: data.meta.pixel_id,
+          capi_enabled: data.meta.capi_enabled,
+          capi_token: metaToken,
+          test_event_code: data.meta.test_event_code || ''
+        }
+      },
+      localization: {
+        default_language: data.localization.default_language,
+        supported_languages: data.localization.supported_languages
+      }
+    })
+
+    if (error) return { success: false, error: error.message }
+    safeRevalidate('/admin/settings')
+    safeRevalidate('/')
+    safeRevalidate('/checkout')
+    return { success: true }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'Erreur sauvegarde globale'
     return { success: false, error: msg }
   }
 }

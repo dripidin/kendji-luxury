@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   GlobalSettings,
@@ -20,6 +20,7 @@ import {
   saveTelegramSettingsAction,
   saveMetaSettingsAction,
   saveLocalizationSettingsAction,
+  saveAllSettingsAction,
   testCourierConnectionAction,
   testTelegramNotificationAction,
   testMetaPixelAction,
@@ -47,7 +48,8 @@ import {
   ExternalLink,
   Radio,
   Eye,
-  EyeOff
+  EyeOff,
+  Save
 } from 'lucide-react'
 
 interface SettingsManagerProps {
@@ -69,8 +71,19 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [meta, setMeta] = useState<MetaSettings>(initialSettings.meta)
   const [localization, setLocalization] = useState<LocalizationSettings>(initialSettings.localization)
 
+  useEffect(() => {
+    setIdentity(initialSettings.identity)
+    setContact(initialSettings.contact)
+    setDelivery(initialSettings.delivery)
+    setCourier(initialSettings.courier)
+    setTelegram(initialSettings.telegram)
+    setMeta(initialSettings.meta)
+    setLocalization(initialSettings.localization)
+  }, [initialSettings])
+
   // Status & Test states
   const [isSaving, setIsSaving] = useState(false)
+  const [isSavingAll, setIsSavingAll] = useState(false)
   const [isTestingCourier, setIsTestingCourier] = useState(false)
   const [isTestingTelegram, setIsTestingTelegram] = useState(false)
   const [isDetectingTelegram, setIsDetectingTelegram] = useState(false)
@@ -89,7 +102,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
 
   const showFeedback = (success: boolean, msg?: string) => {
     if (success) {
-      setSuccessMsg('Modifications enregistrées avec succès.')
+      setSuccessMsg(msg || 'Modifications enregistrées avec succès.')
       setErrorMsg(null)
       router.refresh()
       setTimeout(() => setSuccessMsg(null), 3500)
@@ -97,6 +110,22 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       setErrorMsg(msg || "Une erreur est survenue lors de l'enregistrement.")
       setSuccessMsg(null)
     }
+  }
+
+  // Save All Settings at once
+  const handleSaveAll = async () => {
+    setIsSavingAll(true)
+    const res = await saveAllSettingsAction({
+      identity,
+      contact,
+      delivery,
+      courier,
+      telegram,
+      meta,
+      localization
+    })
+    setIsSavingAll(false)
+    showFeedback(res.success, res.success ? 'Tous les paramètres ont été enregistrés avec succès !' : res.error)
   }
 
   // Filtered Wilayas for Delivery tab
@@ -260,8 +289,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           </p>
         </div>
 
-        {/* Global Feedback notification */}
-        <div className="flex items-center gap-3">
+        {/* Global Action & Feedback notification */}
+        <div className="flex flex-wrap items-center gap-3">
           {successMsg && (
             <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-md flex items-center gap-1.5">
               <Check className="h-4 w-4 text-emerald-600" /> {successMsg}
@@ -272,6 +301,18 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               {errorMsg}
             </span>
           )}
+          <Button
+            onClick={handleSaveAll}
+            disabled={isSavingAll}
+            className="bg-black hover:bg-neutral-800 text-white text-xs uppercase tracking-wider px-5 py-2 flex items-center gap-2 shadow-sm font-medium"
+          >
+            {isSavingAll ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            <span>Enregistrer Tout</span>
+          </Button>
         </div>
       </div>
 
