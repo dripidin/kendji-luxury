@@ -1,14 +1,14 @@
 import { getHomepageContent } from '@/lib/cms'
-import { getAllProducts, getCollections } from '@/lib/catalog'
 import { ContentManager } from '@/components/admin/content-manager'
+import { fetchStorefrontProducts, fetchStorefrontCollections } from '@/lib/storefront-catalog'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminContentPage() {
   const [content, products, collections] = await Promise.all([
     getHomepageContent(),
-    Promise.resolve(getAllProducts()),
-    Promise.resolve(getCollections())
+    fetchStorefrontProducts(),
+    fetchStorefrontCollections()
   ])
 
   return (

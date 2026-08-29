@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,7 +58,7 @@ const STATIC_DEMO_ORDERS: OrderRecord[] = [
 ]
 
 export default async function AdminOrdersPage() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   let orders: OrderRecord[] = []
   let error: string | null = null
