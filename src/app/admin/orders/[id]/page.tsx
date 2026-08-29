@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { notFound } from "next/navigation"
 import Link from "next/link"
 import { ChevronLeft, User, MapPin, Package, Phone } from "lucide-react"
@@ -9,11 +9,13 @@ import { getOrderTimelineEvents } from "@/lib/commerce/order-timeline"
 export const dynamic = "force-dynamic"
 
 interface OrderDetailPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }> | { id: string }
 }
 
 export default async function OrderDetailPage({ params }: OrderDetailPageProps) {
-  const supabase = await createClient()
+  const resolvedParams = await Promise.resolve(params)
+  const id = resolvedParams.id
+  const supabase = createAdminClient()
 
   let orderData: {
     id: string;
@@ -53,21 +55,21 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
     const res = await supabase
       .from("orders")
       .select("*, customers(*), order_items(*), deliveries(*)")
-      .eq("id", params.id)
+      .eq("id", id)
       .single()
 
     if (res.data) {
       orderData = res.data
     }
   } catch {
-    // Sandbox / fallback mode
+    // Database query failed
   }
 
   // Fallback demo order when DB is offline or item is demo
   if (!orderData) {
-    if (params.id.startsWith("demo-") || params.id === "1") {
+    if (id.startsWith("demo-") || id === "1") {
       orderData = {
-        id: params.id,
+        id: id,
         order_number: "KJ-2026-8812",
         customer_id: "c-1",
         status: "CONFIRMED",

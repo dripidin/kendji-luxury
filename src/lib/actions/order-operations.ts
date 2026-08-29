@@ -1,7 +1,7 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { OrderStatus, isValidOrderStatusTransition } from "@/lib/commerce/order-status"
 import { recordTimelineEvent } from "@/lib/commerce/order-timeline"
 import { adjustStock, StockStatus } from "@/lib/commerce/inventory"
@@ -27,17 +27,17 @@ export async function updateOrderStatusAction(
     return { success: false, error: "Identifiant de commande ou statut manquant." }
   }
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // 1. Fetch current order status from DB or default
   let currentStatus: OrderStatus = "PENDING"
   try {
-    const { data: order } = await supabase.from("orders").select("status").eq("id", orderId).single()
-    if (order?.status) {
+    const { data: order, error } = await supabase.from("orders").select("status").eq("id", orderId).single()
+    if (!error && order?.status) {
       currentStatus = order.status as OrderStatus
     }
-  } catch {
-    // Sandbox / fallback mode
+  } catch (err) {
+    console.error("Failed to fetch order status:", err)
   }
 
   // 2. Validate state machine transition
@@ -50,12 +50,21 @@ export async function updateOrderStatusAction(
 
   // 3. Update DB record
   try {
-    await supabase.from("orders").update({
+    const { error: updateError } = await supabase.from("orders").update({
       status: newStatus,
       updated_at: new Date().toISOString()
     }).eq("id", orderId)
-  } catch {
-    // Non-fatal if offline
+
+    if (updateError) {
+      console.error("Database update error on orders:", updateError)
+      return {
+        success: false,
+        error: `Erreur base de données: ${updateError.message}`
+      }
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err)
+    return { success: false, error: msg }
   }
 
   // 4. Record audit timeline event
@@ -87,7 +96,7 @@ export async function createShipmentAction(
   orderId: string,
   providerCode?: string
 ): Promise<OrderOperationResult> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Fetch full order data
   let orderData: {
@@ -113,11 +122,11 @@ export async function createShipmentAction(
     if (!error && data) {
       orderData = data
     }
-  } catch {
-    // Non-fatal
+  } catch (err) {
+    console.error("Shipment data fetch error:", err)
   }
 
-  // Fallback structure if database is offline
+  // Fallback structure if database record is missing
   const safeOrderNumber = orderData?.order_number || `KJ-2026-${orderId.substring(0, 4)}`
   const safeWilaya = orderData?.delivery_wilaya || "16"
   const safeCommune = orderData?.delivery_commune || "Alger Centre"
@@ -172,8 +181,8 @@ export async function createShipmentAction(
       status: "READY_TO_SHIP",
       updated_at: new Date().toISOString()
     }).eq("id", orderId)
-  } catch {
-    // Non-fatal
+  } catch (err) {
+    console.error("Failed to persist delivery record:", err)
   }
 
   // Record audit timeline event
@@ -211,17 +220,21 @@ export async function reconcileCodPaymentAction(
     notes: note
   })
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Update order payment status in DB if fully reconciled or collected
   const newPaymentStatus = record.status === "DISCREPANCY" ? "UNPAID" : "COLLECTED"
   try {
-    await supabase.from("orders").update({
+    const { error } = await supabase.from("orders").update({
       payment_status: newPaymentStatus,
       updated_at: new Date().toISOString()
     }).eq("id", orderId)
-  } catch {
-    // Non-fatal
+
+    if (error) {
+      console.error("Failed to update payment status:", error)
+    }
+  } catch (err) {
+    console.error("Reconcile COD DB error:", err)
   }
 
   // Record timeline event

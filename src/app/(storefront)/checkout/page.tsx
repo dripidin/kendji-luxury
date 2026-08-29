@@ -27,7 +27,9 @@ export default function CheckoutPage() {
   const [selectedWilaya, setSelectedWilaya] = useState("16") // Default Alger
   const [selectedCommune, setSelectedCommune] = useState("Alger Centre")
   const [address, setAddress] = useState("")
-  const [deliveryMethod, setDeliveryMethod] = useState<"DOMICILE" | "STOP_DESK">("DOMICILE")
+  
+  // Delivery method must NOT be selected by default
+  const [deliveryMethod, setDeliveryMethod] = useState<"DOMICILE" | "STOP_DESK" | null>(null)
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -61,7 +63,7 @@ export default function CheckoutPage() {
     }
   }
 
-  const deliveryFee = getDeliveryFee(selectedWilaya, deliveryMethod)
+  const deliveryFee = deliveryMethod ? getDeliveryFee(selectedWilaya, deliveryMethod) : 0
   const grandTotal = subtotal + deliveryFee
 
   const handleSubmitOrder = async (e: React.FormEvent) => {
@@ -85,6 +87,11 @@ export default function CheckoutPage() {
 
     if (!address.trim()) {
       setErrorMessage(locale === 'ar' ? "يرجى كتابة العنوان بالتفصيل." : "Veuillez saisir votre adresse complète.")
+      return
+    }
+
+    if (!deliveryMethod) {
+      setErrorMessage(locale === 'ar' ? "يرجى اختيار طريقة التوصيل (توصيل للمنزل أو استلام من المكتب)." : "Veuillez choisir un mode d'expédition (Livraison à Domicile ou Point Relais).")
       return
     }
 
@@ -133,11 +140,20 @@ export default function CheckoutPage() {
         }))
       })
 
+      // Store order confirmation snapshot for confirmation page display
+      if (res.orderNumber && typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem(`order_conf_${res.orderNumber}`, JSON.stringify(res))
+        } catch {
+          // Ignore session storage error
+        }
+      }
+
       // Clear the cart
       clearCart()
 
       // Redirect to confirmation page
-      router.push(`/order/confirmation?num=${res.orderNumber || ''}`)
+      router.push(`/checkout/confirmation/${encodeURIComponent(res.orderNumber || '')}`)
 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
@@ -342,25 +358,33 @@ export default function CheckoutPage() {
                   />
                 </div>
 
-                {/* Delivery Mode Choice */}
+                {/* Delivery Mode Choice - MUST BE CHOSEN BY USER */}
                 <div className="space-y-2 pt-2">
-                  <Label className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80 block">
-                    {t.checkout.deliveryMethod}
-                  </Label>
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs uppercase tracking-wider font-semibold text-[#1A1A1A]/80 block">
+                      {t.checkout.deliveryMethod} *
+                    </Label>
+                    {!deliveryMethod && (
+                      <span className="text-[11px] text-amber-700 font-medium font-sans">
+                        {locale === 'ar' ? '← يرجى اختيار أحد الخيارين' : '← Veuillez faire un choix'}
+                      </span>
+                    )}
+                  </div>
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <button
                       type="button"
                       onClick={() => setDeliveryMethod("DOMICILE")}
-                      className={`p-3.5 border text-left transition-all ${
+                      className={`p-4 border text-left transition-all rounded-sm relative ${
                         deliveryMethod === "DOMICILE"
-                          ? "border-[#1A1A1A] bg-[#1A1A1A] text-white"
+                          ? "border-[#1A1A1A] bg-[#1A1A1A] text-white ring-2 ring-[#1A1A1A]/20 shadow-sm"
                           : "border-[#1A1A1A]/20 bg-white text-[#1A1A1A] hover:border-[#1A1A1A]/50"
                       }`}
                     >
                       <span className="font-semibold block text-xs uppercase tracking-wider">
                         {t.checkout.domicile}
                       </span>
-                      <span className={`text-[11px] block mt-0.5 ${deliveryMethod === "DOMICILE" ? "text-white/80" : "text-[#1A1A1A]/60"}`}>
+                      <span className={`text-[11px] block mt-1 ${deliveryMethod === "DOMICILE" ? "text-white/80" : "text-[#1A1A1A]/60"}`}>
                         {locale === 'ar' ? 'توصيل مباشر إلى باب منزلك' : 'Remise directe à votre adresse'}
                       </span>
                     </button>
@@ -368,16 +392,16 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => setDeliveryMethod("STOP_DESK")}
-                      className={`p-3.5 border text-left transition-all ${
+                      className={`p-4 border text-left transition-all rounded-sm relative ${
                         deliveryMethod === "STOP_DESK"
-                          ? "border-[#1A1A1A] bg-[#1A1A1A] text-white"
+                          ? "border-[#1A1A1A] bg-[#1A1A1A] text-white ring-2 ring-[#1A1A1A]/20 shadow-sm"
                           : "border-[#1A1A1A]/20 bg-white text-[#1A1A1A] hover:border-[#1A1A1A]/50"
                       }`}
                     >
                       <span className="font-semibold block text-xs uppercase tracking-wider">
                         {t.checkout.stopDesk}
                       </span>
-                      <span className={`text-[11px] block mt-0.5 ${deliveryMethod === "STOP_DESK" ? "text-white/80" : "text-[#1A1A1A]/60"}`}>
+                      <span className={`text-[11px] block mt-1 ${deliveryMethod === "STOP_DESK" ? "text-white/80" : "text-[#1A1A1A]/60"}`}>
                         {locale === 'ar' ? 'استلام من مكتب شركة الشحن' : 'Réception en agence express'}
                       </span>
                     </button>
@@ -443,8 +467,16 @@ export default function CheckoutPage() {
                 <span className="font-medium font-mono">{subtotal.toLocaleString('fr-FR')} {t.common.currencySymbol}</span>
               </div>
               <div className="flex justify-between text-[#1A1A1A]/70">
-                <span>{t.cart.shipping} ({deliveryMethod === 'DOMICILE' ? (locale === 'ar' ? 'منزل' : 'Domicile') : (locale === 'ar' ? 'مكتب' : 'Stop-Desk')})</span>
-                <span className="font-medium font-mono">{deliveryFee.toLocaleString('fr-FR')} {t.common.currencySymbol}</span>
+                <span>{t.cart.shipping}</span>
+                <span className="font-medium font-mono">
+                  {deliveryMethod ? (
+                    `${deliveryFee.toLocaleString('fr-FR')} ${t.common.currencySymbol}`
+                  ) : (
+                    <span className="text-amber-700 italic font-sans text-[11px]">
+                      {locale === 'ar' ? 'يرجى اختيار طريقة التوصيل' : 'Sélectionnez un mode'}
+                    </span>
+                  )}
+                </span>
               </div>
             </div>
 

@@ -1,14 +1,18 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { CategoryForm } from '@/components/admin/category-form'
 import { CategoryFormValues } from '@/lib/validations/catalog'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-export default async function EditCategoryPage({ params }: { params: { id: string } }) {
-  const supabase = await createClient()
+export const dynamic = 'force-dynamic'
+
+export default async function EditCategoryPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+  const resolvedParams = await Promise.resolve(params)
+  const id = resolvedParams.id
+  const supabase = createAdminClient()
   
-  const { data: category, error } = await supabase.from('categories').select('*').eq('id', params.id).single()
+  const { data: category, error } = await supabase.from('categories').select('*').eq('id', id).single()
 
   if (error || !category) {
     notFound()

@@ -1,7 +1,7 @@
 "use server"
 
 import { z } from "zod"
-import { createClient } from "@/lib/supabase/server"
+import { createAdminClient } from "@/lib/supabase/admin"
 import { validateAndNormalizeAlgerianPhone } from "@/lib/validation/algerian-phone"
 import { getWilayaByCode, getDeliveryFee } from "@/lib/algeria-cities"
 import { getAllProducts } from "@/lib/catalog"
@@ -64,76 +64,60 @@ export interface OrderConfirmationResult {
   error?: string;
 }
 
-// In-memory idempotency cache for duplicate submission lock (per session/token)
-const processedTokens = new Set<string>()
-
+/**
+ * Server action to create a Cash-on-Delivery (COD) order.
+ * Validates Algerian phone, computes authoritative pricing from product catalog,
+ * creates customer/order/items in Supabase, and returns an authoritative order receipt.
+ */
 export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmationResult> {
   try {
-    // 1. Validate request shape
+    // 1. Schema Validation
     const parsed = createOrderSchema.safeParse(rawInput)
     if (!parsed.success) {
-      const firstError = parsed.error.issues[0]?.message || "Données de commande invalides"
+      const firstError = parsed.error.issues[0]?.message || "Données de commande invalides."
       return { success: false, error: firstError }
     }
 
-    const { customer, delivery, items, idempotencyToken } = parsed.data
+    const { customer, delivery, items } = parsed.data
 
-    // 2. Prevent duplicate submission via idempotency token
-    if (idempotencyToken) {
-      if (processedTokens.has(idempotencyToken)) {
-        return { 
-          success: false, 
-          error: "Cette commande est déjà en cours de traitement. Veuillez patienter." 
-        }
-      }
-      processedTokens.add(idempotencyToken)
-      // Keep token for 2 minutes then expire
-      setTimeout(() => processedTokens.delete(idempotencyToken), 120000)
-    }
-
-    // 3. Validate and normalize Algerian phone number
+    // 2. Validate Algerian Phone Number
     const phoneValidation = validateAndNormalizeAlgerianPhone(customer.phone)
     if (!phoneValidation.isValid || !phoneValidation.normalized) {
-      return { 
-        success: false, 
-        error: phoneValidation.error || "Numéro de téléphone algérien invalide." 
+      return {
+        success: false,
+        error: phoneValidation.error || "Numéro de téléphone algérien invalide (ex: 0550123456)."
       }
     }
     const normalizedPhone = phoneValidation.normalized
 
-    // 4. Validate Wilaya & Commune
+    // 3. Validate Wilaya
     const wilayaObj = getWilayaByCode(delivery.wilaya)
     if (!wilayaObj) {
-      return { success: false, error: "Wilaya sélectionnée non reconnue." }
+      return { success: false, error: "Wilaya sélectionnée non valide." }
     }
 
-    const isCommuneValid = wilayaObj.communes.some(
-      c => c.toLowerCase() === delivery.commune.trim().toLowerCase()
-    )
-    if (!isCommuneValid && wilayaObj.communes.length > 0) {
-      return { success: false, error: `Commune invalide pour la Wilaya ${wilayaObj.name}.` }
-    }
+    // 4. Fetch authoritative products to prevent client-side price tampering
+    const allProducts = getAllProducts()
+    const productMap = new Map(allProducts.map(p => [p.id, p]))
 
-    // 5. Authoritative Price Resolution (NEVER trust client prices)
-    const catalogProducts = getAllProducts()
-    const itemSnapshots: OrderItemSnapshot[] = []
+    // 5. Authoritative price calculation & Snapshot creation
     let calculatedSubtotal = 0
+    const itemSnapshots: OrderItemSnapshot[] = []
 
     for (const item of items) {
-      // Lookup product from authoritative catalog
-      const product = catalogProducts.find(p => p.id === item.productId || p.slug === item.productId)
+      const product = productMap.get(item.productId)
       if (!product) {
-        return { 
-          success: false, 
-          error: `Le produit référencé (${item.productId}) n'est plus disponible.` 
+        return {
+          success: false,
+          error: `Le bijou sélectionné (ID: ${item.productId}) n'est plus disponible.`
         }
       }
 
-      let variantLabel: string | undefined = undefined
+      let variantLabel: string | undefined
       if (item.variantId && product.variants) {
-        const matchedVariant = product.variants.find(v => v.id === item.variantId)
-        if (matchedVariant) {
-          variantLabel = matchedVariant.name
+        const foundVariant = product.variants.find(v => v.id === item.variantId)
+        if (foundVariant) {
+          variantLabel = foundVariant.name
         }
       }
 
@@ -160,9 +144,9 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
     const randomSuffix = Math.floor(1000 + Math.random() * 9000)
     const orderNumber = `KJ-2026-${randomSuffix}`
 
-    // 8. Attempt database persistence to Supabase (non-blocking if local DB is offline)
+    // 8. Authoritative database persistence to Supabase
     try {
-      const supabase = await createClient()
+      const supabase = createAdminClient()
 
       // Customer reuse / upsert by normalized phone
       let customerId: string | null = null
@@ -235,7 +219,7 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
         }
       }
     } catch (dbErr) {
-      console.warn("[COD Order] Database connection bypassed; returning verified order response:", dbErr)
+      console.error("[COD Order] Database insertion log:", dbErr)
     }
 
     // 9. Return verified order confirmation

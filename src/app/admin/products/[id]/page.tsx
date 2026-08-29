@@ -1,13 +1,16 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ProductForm } from '@/components/admin/product-form'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { PRODUCTS } from '@/lib/catalog'
 
-export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  const supabase = await createClient()
+export const dynamic = 'force-dynamic'
+
+export default async function EditProductPage({ params }: { params: Promise<{ id: string }> | { id: string } }) {
+  const resolvedParams = await Promise.resolve(params)
+  const id = resolvedParams.id
+  const supabase = createAdminClient()
 
   const [categoriesRes, collectionsRes, productRes] = await Promise.all([
     supabase.from('categories').select('id, name').order('name'),

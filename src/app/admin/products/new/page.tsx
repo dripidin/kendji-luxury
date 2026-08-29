@@ -1,19 +1,19 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ProductForm } from '@/components/admin/product-form'
 import { ChevronLeft } from 'lucide-react'
 import Link from 'next/link'
 import { PRODUCTS } from '@/lib/catalog'
 
-export default async function NewProductPage() {
-  const supabase = await createClient()
+export const dynamic = 'force-dynamic'
 
-  // Fetch active categories & collections
+export default async function NewProductPage() {
+  const supabase = createAdminClient()
+
   const [categoriesRes, collectionsRes] = await Promise.all([
-    supabase.from('categories').select('id, name').eq('active', true).order('name'),
-    supabase.from('collections').select('id, name').eq('active', true).order('name')
+    supabase.from('categories').select('id, name').order('name'),
+    supabase.from('collections').select('id, name').order('name')
   ])
 
-  // Extract list of approved store media paths
   const approvedMediaLibrary = Array.from(
     new Set(PRODUCTS.flatMap(p => [p.coverImage, ...p.images]).filter(Boolean))
   )
@@ -28,9 +28,9 @@ export default async function NewProductPage() {
           <ChevronLeft className="h-6 w-6" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Add New Product</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Create Product</h1>
           <p className="text-muted-foreground mt-1">
-            Create a new fine jewelry piece in the KenDji Luxury catalog.
+            Add a new high-jewelry piece to the KenDji catalog.
           </p>
         </div>
       </div>

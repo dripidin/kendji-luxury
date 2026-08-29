@@ -8,24 +8,30 @@ interface I18nContextType {
   setLocale: (locale: Locale) => void
   t: Dictionary
   dir: 'ltr' | 'rtl'
+  isMounted: boolean
 }
 
 const I18nContext = createContext<I18nContextType | null>(null)
 
 const STORAGE_KEY = 'kendji_locale'
 
-function getInitialLocale(): Locale {
-  if (typeof window !== 'undefined') {
+export function I18nProvider({ children }: { children: React.ReactNode }) {
+  // Always initialize to 'fr' initially so server-side render matches client first pass
+  const [locale, setLocaleState] = useState<Locale>('fr')
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
     const saved = localStorage.getItem(STORAGE_KEY) as Locale
     if (saved && (saved === 'fr' || saved === 'ar' || saved === 'en')) {
-      return saved
+      setLocaleState(saved)
+      document.documentElement.lang = saved
+      document.documentElement.dir = getDirection(saved)
+    } else {
+      document.documentElement.lang = 'fr'
+      document.documentElement.dir = 'ltr'
     }
-  }
-  return 'fr'
-}
-
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(getInitialLocale)
+  }, [])
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale)
@@ -37,17 +43,11 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  useEffect(() => {
-    // Initial sync on mount
-    document.documentElement.lang = locale
-    document.documentElement.dir = getDirection(locale)
-  }, [locale])
-
   const t = getDictionary(locale)
   const dir = getDirection(locale)
 
   return (
-    <I18nContext.Provider value={{ locale, setLocale, t, dir }}>
+    <I18nContext.Provider value={{ locale, setLocale, t, dir, isMounted }}>
       {children}
     </I18nContext.Provider>
   )
@@ -56,13 +56,13 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
 export function useI18n() {
   const context = useContext(I18nContext)
   if (!context) {
-    // Fallback if rendered outside provider
     const fallbackT = getDictionary('fr')
     return {
       locale: 'fr' as Locale,
       setLocale: () => {},
       t: fallbackT,
-      dir: 'ltr' as const
+      dir: 'ltr' as const,
+      isMounted: false
     }
   }
   return context
