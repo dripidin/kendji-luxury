@@ -75,26 +75,24 @@ export class DzshipUniversalAdapter implements CourierProvider {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        // Fallback simulation if credentials are test accounts
-        const fallbackTracking = `KJ-${this.code}-${request.orderNumber}`;
+        const errMsg = data?.error || data?.message || `Courier API error HTTP ${res.status}`
+        console.error(`[DZShip][${this.courierType.toUpperCase()}] API error:`, errMsg, JSON.stringify(data))
         return {
-          success: true,
+          success: false,
           provider: this.code,
-          trackingNumber: data.trackingNumber || fallbackTracking,
-          trackingUrl: this.getTrackingUrl(data.trackingNumber || fallbackTracking) || undefined,
-          deliveryStatus: "CREATED",
+          deliveryStatus: 'FAILED',
+          error: errMsg,
           rawResponse: data
-        };
+        }
       }
-
       return {
         success: true,
         provider: this.code,
         trackingNumber: data.trackingNumber,
         trackingUrl: this.getTrackingUrl(data.trackingNumber) || undefined,
-        deliveryStatus: "CREATED",
+        deliveryStatus: 'CREATED',
         rawResponse: data
-      };
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       return {
