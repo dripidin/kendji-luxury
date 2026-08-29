@@ -44,7 +44,9 @@ import {
   CreditCard,
   Zap,
   ExternalLink,
-  Radio
+  Radio,
+  Eye,
+  EyeOff
 } from 'lucide-react'
 
 interface SettingsManagerProps {
@@ -73,9 +75,12 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [isDetectingTelegram, setIsDetectingTelegram] = useState(false)
   const [detectedChats, setDetectedChats] = useState<{ id: string | number; title: string; type: string; username?: string }[]>([])
   const [isTestingMeta, setIsTestingMeta] = useState(false)
-  const [courierTestResult, setCourierTestResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [courierTestResult, setCourierTestResult] = useState<{ success: boolean; message?: string; error?: string } | null>(null)
   const [telegramTestResult, setTelegramTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [metaTestResult, setMetaTestResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [showCourierToken, setShowCourierToken] = useState(false)
+  const [showTelegramToken, setShowTelegramToken] = useState(false)
+  const [showMetaToken, setShowMetaToken] = useState(false)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [wilayaSearch, setWilayaSearch] = useState('')
@@ -649,13 +654,24 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                       Token API Ecotrack (Bearer Token)
                       {courier.api_key_configured && <span className="text-emerald-600 text-xs ml-1.5">(Enregistré)</span>}
                     </Label>
-                    <Input
-                      id="courier-token"
-                      type="password"
-                      placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Collez votre Token API Ecotrack...'}
-                      value={courier.api_token || courier.api_key || ''}
-                      onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="courier-token"
+                        type={showCourierToken ? 'text' : 'password'}
+                        placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Collez votre Token API Ecotrack...'}
+                        value={courier.api_token || courier.api_key || ''}
+                        onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCourierToken(!showCourierToken)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                        title={showCourierToken ? "Masquer le token" : "Afficher le token"}
+                      >
+                        {showCourierToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     <p className="text-[11px] text-gray-500">
                       Généré dans votre espace Ecotrack &gt; Paramètres &gt; API Public.
                     </p>
@@ -680,13 +696,24 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                       {courier.active_provider === 'YALIDINE' ? 'API Token / X-User-Token' : 'Clé API / Token'}
                       {courier.api_key_configured && <span className="text-emerald-600 text-xs ml-1.5">(Enregistré)</span>}
                     </Label>
-                    <Input
-                      id="courier-token"
-                      type="password"
-                      placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Saisir la clé / token API...'}
-                      value={courier.api_token || courier.api_key || ''}
-                      onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
-                    />
+                    <div className="relative">
+                      <Input
+                        id="courier-token"
+                        type={showCourierToken ? 'text' : 'password'}
+                        placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Saisir la clé / token API...'}
+                        value={courier.api_token || courier.api_key || ''}
+                        onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
+                        className="pr-10"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowCourierToken(!showCourierToken)}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                        title={showCourierToken ? "Masquer la clé" : "Afficher la clé"}
+                      >
+                        {showCourierToken ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
                     <p className="text-[11px] text-gray-500">
                       Laissez vide pour conserver les clés sécurisées actuellement enregistrées.
                     </p>
