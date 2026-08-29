@@ -10,7 +10,7 @@ interface CategoryEmphasisProps {
 }
 
 export function CategoryEmphasis({ product }: CategoryEmphasisProps) {
-  const { t, dir } = useI18n()
+  const { t } = useI18n()
 
   const getCategoryHighlights = () => {
     switch (product.categorySlug) {

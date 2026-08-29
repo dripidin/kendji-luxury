@@ -1,6 +1,6 @@
 'use client'
 
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useSyncExternalStore } from 'react'
 import { Locale, Dictionary, getDictionary, getDirection } from './translations'
 
 interface I18nContextType {
@@ -14,24 +14,31 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType | null>(null)
 
 const STORAGE_KEY = 'kendji_locale'
+const emptySubscribe = () => () => {}
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  // Always initialize to 'ar' initially as official site language
-  const [locale, setLocaleState] = useState<Locale>('ar')
-  const [isMounted, setIsMounted] = useState(false)
-
-  useEffect(() => {
-    setIsMounted(true)
+function getInitialLocale(): Locale {
+  if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(STORAGE_KEY) as Locale
     if (saved && (saved === 'fr' || saved === 'ar' || saved === 'en')) {
-      setLocaleState(saved)
-      document.documentElement.lang = saved
-      document.documentElement.dir = getDirection(saved)
-    } else {
-      document.documentElement.lang = 'ar'
-      document.documentElement.dir = 'rtl'
+      return saved
     }
-  }, [])
+  }
+  return 'ar'
+}
+
+export function I18nProvider({ children }: { children: React.ReactNode }) {
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  )
+
+  const [locale, setLocaleState] = useState<Locale>(getInitialLocale)
+
+  useEffect(() => {
+    document.documentElement.lang = locale
+    document.documentElement.dir = getDirection(locale)
+  }, [locale])
 
   const setLocale = (newLocale: Locale) => {
     setLocaleState(newLocale)
