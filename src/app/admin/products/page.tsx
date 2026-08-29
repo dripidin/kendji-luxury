@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -8,7 +8,7 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminProducts() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   let products: { id: string, name: string, base_price: number, status: string, created_at: string }[] | null = null
   let error = null

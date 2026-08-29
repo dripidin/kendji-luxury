@@ -1,10 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminCustomers() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   let customers: { id: string, full_name: string, phone: string, created_at: string }[] | null = null
   let error = null

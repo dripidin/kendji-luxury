@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Plus } from 'lucide-react'
@@ -7,7 +7,7 @@ import Link from 'next/link'
 export const dynamic = 'force-dynamic'
 
 export default async function AdminCollections() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   
   let collections: { id: string, name: string, slug: string, is_active: boolean }[] | null = null
   let error = null

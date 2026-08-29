@@ -1,11 +1,11 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Package, ShoppingCart, Users } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
 
   // Attempt to fetch metrics safely
   const [{ count: productsCount, error: productsError }, { count: ordersCount, error: ordersError }, { count: customersCount, error: customersError }] = await Promise.all([
