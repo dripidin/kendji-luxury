@@ -37,6 +37,7 @@ export interface CourierSettings {
 export interface TelegramSettings {
   enabled: boolean
   chat_id: string
+  invite_link?: string
   bot_token?: string
   bot_link?: string
   token_configured?: boolean
@@ -102,6 +103,7 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   telegram: {
     enabled: false,
     chat_id: '',
+    invite_link: '',
     bot_link: 'https://t.me/KendjiLuxuryBot',
     token_configured: false,
     events: ['new_order', 'shipment_created', 'delivered']
@@ -178,6 +180,7 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
         telegram: {
           enabled: integrations.telegram?.enabled ?? false,
           chat_id: integrations.telegram?.chat_id || '',
+          invite_link: integrations.telegram?.invite_link || '',
           bot_token: unmaskSecrets ? telegramToken : undefined,
           bot_link: integrations.telegram?.bot_link || DEFAULT_GLOBAL_SETTINGS.telegram.bot_link,
           token_configured: Boolean(telegramToken || process.env.TELEGRAM_BOT_TOKEN),

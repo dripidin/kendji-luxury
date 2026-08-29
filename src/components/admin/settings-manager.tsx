@@ -22,7 +22,8 @@ import {
   saveLocalizationSettingsAction,
   testCourierConnectionAction,
   testTelegramNotificationAction,
-  testMetaPixelAction
+  testMetaPixelAction,
+  detectTelegramChatsAction
 } from '@/app/admin/actions/settings'
 import { ALGERIA_WILAYAS } from '@/lib/algeria-cities'
 import { Button } from '@/components/ui/button'
@@ -42,7 +43,8 @@ import {
   Building,
   CreditCard,
   Zap,
-  ExternalLink
+  ExternalLink,
+  Radio
 } from 'lucide-react'
 
 interface SettingsManagerProps {
@@ -68,6 +70,8 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingCourier, setIsTestingCourier] = useState(false)
   const [isTestingTelegram, setIsTestingTelegram] = useState(false)
+  const [isDetectingTelegram, setIsDetectingTelegram] = useState(false)
+  const [detectedChats, setDetectedChats] = useState<{ id: string | number; title: string; type: string; username?: string }[]>([])
   const [isTestingMeta, setIsTestingMeta] = useState(false)
   const [courierTestResult, setCourierTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [telegramTestResult, setTelegramTestResult] = useState<{ success: boolean; message: string } | null>(null)
@@ -166,12 +170,28 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const handleTestTelegram = async () => {
     setIsTestingTelegram(true)
     setTelegramTestResult(null)
-    const res = await testTelegramNotificationAction(telegram.bot_token, telegram.chat_id)
+    const target = telegram.invite_link || telegram.chat_id
+    const res = await testTelegramNotificationAction(telegram.bot_token, target)
     setIsTestingTelegram(false)
     setTelegramTestResult({
       success: res.success,
       message: res.success ? res.message || 'Notification envoyée avec succès' : res.error || 'Erreur Telegram'
     })
+  }
+
+  const handleDetectTelegram = async () => {
+    setIsDetectingTelegram(true)
+    setDetectedChats([])
+    const res = await detectTelegramChatsAction(telegram.bot_token)
+    setIsDetectingTelegram(false)
+    if (res.success && res.chats && res.chats.length > 0) {
+      setDetectedChats(res.chats)
+    } else {
+      setTelegramTestResult({
+        success: false,
+        message: res.error || 'Aucun canal détecté. Assurez-vous que le bot est admin dans votre canal.'
+      })
+    }
   }
 
   const handleTestMeta = async () => {
@@ -748,16 +768,64 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="tele-chat-id">Chat ID / Channel ID</Label>
-                <Input
-                  id="tele-chat-id"
-                  placeholder="-1001234567890 ou @votre_canal"
-                  value={telegram.chat_id}
-                  onChange={e => setTelegram({ ...telegram, chat_id: e.target.value })}
-                />
+                <Label htmlFor="tele-invite-link">
+                  Lien d&apos;Invitation / Lien Canal / Chat ID
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="tele-invite-link"
+                    placeholder="https://t.me/+xxxx, https://t.me/canal, @canal ou -1001234..."
+                    value={telegram.invite_link || telegram.chat_id || ''}
+                    onChange={e => setTelegram({ ...telegram, invite_link: e.target.value, chat_id: e.target.value })}
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleDetectTelegram}
+                    disabled={isDetectingTelegram || !telegram.bot_token}
+                    className="text-xs bg-white border-gray-300 flex-shrink-0 whitespace-nowrap"
+                    title="Détecte automatiquement les canaux/groupes où le bot est admin"
+                  >
+                    {isDetectingTelegram
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <Radio className="h-3.5 w-3.5 text-blue-500" />
+                    }
+                    <span className="ml-1.5 hidden sm:inline">Auto-détecter</span>
+                  </Button>
+                </div>
                 <p className="text-[11px] text-gray-500">
-                  ID du groupe/canal ou utilisateur privé (obtenu via @userinfobot).
+                  Accepte un lien d&apos;invitation privé <code>t.me/+…</code>, URL public <code>t.me/channel</code>, <code>@username</code> ou ID numérique. Cliquez <b>Auto-détecter</b> pour trouver automatiquement les canaux où le bot est présent.
                 </p>
+
+                {/* Detected chats picker */}
+                {detectedChats.length > 0 && (
+                  <div className="mt-2 border rounded-md overflow-hidden bg-white">
+                    <p className="text-[11px] font-semibold text-gray-700 px-3 py-2 bg-gray-50 border-b">
+                      Canaux / Groupes détectés — cliquez pour sélectionner :
+                    </p>
+                    <ul className="divide-y max-h-40 overflow-y-auto">
+                      {detectedChats.map(chat => (
+                        <li key={String(chat.id)}>
+                          <button
+                            type="button"
+                            className="w-full text-left px-3 py-2 text-xs hover:bg-blue-50 flex items-center justify-between gap-2"
+                            onClick={() => {
+                              const val = String(chat.id)
+                              setTelegram({ ...telegram, invite_link: val, chat_id: val })
+                              setDetectedChats([])
+                            }}
+                          >
+                            <span className="font-medium text-gray-900">{chat.title}</span>
+                            <span className="text-gray-400 font-mono">{String(chat.id)}</span>
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{chat.type}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -808,7 +876,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 variant="outline"
                 size="sm"
                 onClick={handleTestTelegram}
-                disabled={isTestingTelegram || (!telegram.chat_id && !telegram.token_configured)}
+                disabled={isTestingTelegram || (!telegram.invite_link && !telegram.chat_id && !telegram.token_configured)}
                 className="text-xs bg-white border-gray-300 flex-shrink-0"
               >
                 {isTestingTelegram ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5 text-blue-600" />}

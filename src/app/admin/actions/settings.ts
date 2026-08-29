@@ -11,6 +11,7 @@ import {
   MetaSettings,
   LocalizationSettings
 } from '@/lib/settings'
+import { normalizeTelegramTarget, autoDetectBotChats } from '@/lib/notifications/telegram'
 
 function safeRevalidate(path: string) {
   try {
@@ -180,6 +181,7 @@ export async function saveTelegramSettingsAction(data: TelegramSettings) {
           telegram: {
             enabled: data.enabled,
             chat_id: data.chat_id,
+            invite_link: data.invite_link || '',
             bot_token: tokenToSave,
             bot_link: data.bot_link || 'https://t.me/KendjiLuxuryBot',
             events: data.events
@@ -298,9 +300,9 @@ export async function testCourierConnectionAction(
 }
 
 /**
- * Safe Test Telegram Notification Ping
+ * Auto-detects all groups/channels where the bot was recently added
  */
-export async function testTelegramNotificationAction(botToken?: string, chatId?: string) {
+export async function detectTelegramChatsAction(botToken?: string) {
   try {
     const supabase = createAdminClient()
     const { data: current } = await supabase
@@ -310,16 +312,43 @@ export async function testTelegramNotificationAction(botToken?: string, chatId?:
       .single()
 
     const token = botToken || current?.integrations?.telegram?.bot_token || process.env.TELEGRAM_BOT_TOKEN
-    const chat = chatId || current?.integrations?.telegram?.chat_id || process.env.TELEGRAM_CHAT_ID
-
-    if (!token || !chat) {
-      return { success: false, error: 'Veuillez saisir un Bot Token et un Chat ID valides.' }
+    if (!token) {
+      return { success: false, error: 'Veuillez saisir un Bot Token avant de lancer la détection.' }
     }
+
+    return await autoDetectBotChats(token)
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Échec de détection Telegram'
+    return { success: false, error: msg }
+  }
+}
+
+/**
+ * Safe Test Telegram Notification Ping
+ */
+export async function testTelegramNotificationAction(botToken?: string, target?: string) {
+  try {
+    const supabase = createAdminClient()
+    const { data: current } = await supabase
+      .from('site_settings')
+      .select('integrations')
+      .eq('id', 1)
+      .single()
+
+    const token = botToken || current?.integrations?.telegram?.bot_token || process.env.TELEGRAM_BOT_TOKEN
+    const rawTarget = target || current?.integrations?.telegram?.invite_link || current?.integrations?.telegram?.chat_id || process.env.TELEGRAM_CHAT_ID
+
+    if (!token || !rawTarget) {
+      return { success: false, error: 'Veuillez saisir un Bot Token et un Lien d\'invitation / Chat ID valides.' }
+    }
+
+    // Resolve target
+    const { targetId } = await normalizeTelegramTarget(rawTarget, token)
 
     // Ping Telegram Bot API safely
     const url = `https://api.telegram.org/bot${token}/sendMessage`
     const payload = {
-      chat_id: chat,
+      chat_id: targetId,
       text: '✨ <b>KenDji Luxury Boutique</b> : Test de notification opérationnelle réussi. Vos alertes de commande et expéditions sont actives.',
       parse_mode: 'HTML'
     }
@@ -332,10 +361,10 @@ export async function testTelegramNotificationAction(botToken?: string, chatId?:
 
     const data = await res.json()
     if (!data.ok) {
-      return { success: false, error: `Erreur Telegram: ${data.description || 'Token ou Chat ID invalide'}` }
+      return { success: false, error: `Erreur Telegram: ${data.description || 'Token ou Lien d\'invitation invalide'}` }
     }
 
-    return { success: true, message: 'Message test envoyé avec succès sur votre canal Telegram.' }
+    return { success: true, message: `Message test envoyé avec succès sur le canal (${targetId}).` }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Échec de connexion avec les serveurs Telegram'
     return { success: false, error: msg }
