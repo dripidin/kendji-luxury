@@ -1,0 +1,773 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+  GlobalSettings,
+  StoreIdentitySettings,
+  StoreContactSettings,
+  CodDeliverySettings,
+  CourierSettings,
+  TelegramSettings,
+  MetaSettings,
+  LocalizationSettings
+} from '@/lib/settings'
+import {
+  saveStoreIdentityAction,
+  saveStoreContactAction,
+  saveDeliverySettingsAction,
+  saveCourierSettingsAction,
+  saveTelegramSettingsAction,
+  saveMetaSettingsAction,
+  saveLocalizationSettingsAction
+} from '@/app/admin/actions/settings'
+import { ALGERIA_WILAYAS } from '@/lib/algeria-cities'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import {
+  Check,
+  Loader2,
+  Search,
+  RotateCcw,
+  ShieldCheck,
+  Send,
+  BarChart3,
+  Languages,
+  Truck,
+  Building,
+  CreditCard
+} from 'lucide-react'
+
+interface SettingsManagerProps {
+  initialSettings: GlobalSettings
+}
+
+export function SettingsManager({ initialSettings }: SettingsManagerProps) {
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<
+    'identity' | 'contact' | 'delivery' | 'courier' | 'telegram' | 'meta' | 'localization'
+  >('identity')
+
+  // Form states per section
+  const [identity, setIdentity] = useState<StoreIdentitySettings>(initialSettings.identity)
+  const [contact, setContact] = useState<StoreContactSettings>(initialSettings.contact)
+  const [delivery, setDelivery] = useState<CodDeliverySettings>(initialSettings.delivery)
+  const [courier, setCourier] = useState<CourierSettings>(initialSettings.courier)
+  const [telegram, setTelegram] = useState<TelegramSettings>(initialSettings.telegram)
+  const [meta, setMeta] = useState<MetaSettings>(initialSettings.meta)
+  const [localization, setLocalization] = useState<LocalizationSettings>(initialSettings.localization)
+
+  // Status states
+  const [isSaving, setIsSaving] = useState(false)
+  const [successMsg, setSuccessMsg] = useState<string | null>(null)
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [wilayaSearch, setWilayaSearch] = useState('')
+
+  const showFeedback = (success: boolean, msg?: string) => {
+    if (success) {
+      setSuccessMsg('Modifications enregistrées avec succès.')
+      setErrorMsg(null)
+      router.refresh()
+      setTimeout(() => setSuccessMsg(null), 3500)
+    } else {
+      setErrorMsg(msg || "Une erreur est survenue lors de l'enregistrement.")
+      setSuccessMsg(null)
+    }
+  }
+
+  // Filtered Wilayas for Delivery tab
+  const filteredWilayas = ALGERIA_WILAYAS.filter(w => {
+    const q = wilayaSearch.toLowerCase().trim()
+    return (
+      w.code.includes(q) ||
+      w.name.toLowerCase().includes(q) ||
+      (w.nameAr && w.nameAr.includes(q))
+    )
+  })
+
+  // Handlers for individual section saves
+  const handleSaveIdentity = async () => {
+    setIsSaving(true)
+    const res = await saveStoreIdentityAction(identity)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const handleSaveContact = async () => {
+    setIsSaving(true)
+    const res = await saveStoreContactAction(contact)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const handleSaveDelivery = async () => {
+    setIsSaving(true)
+    const res = await saveDeliverySettingsAction(delivery)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const handleSaveCourier = async () => {
+    setIsSaving(true)
+    const res = await saveCourierSettingsAction(courier)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const handleSaveTelegram = async () => {
+    setIsSaving(true)
+    const res = await saveTelegramSettingsAction(telegram)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const handleSaveMeta = async () => {
+    setIsSaving(true)
+    const res = await saveMetaSettingsAction(meta)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const handleSaveLocalization = async () => {
+    setIsSaving(true)
+    const res = await saveLocalizationSettingsAction(localization)
+    setIsSaving(false)
+    showFeedback(res.success, res.error)
+  }
+
+  const updateWilayaFee = (code: string, method: 'domicile' | 'stopDesk', value: number) => {
+    const nextFees = { ...delivery.custom_fees }
+    const current = nextFees[code] || {}
+    nextFees[code] = {
+      ...current,
+      [method]: isNaN(value) ? undefined : Math.max(0, value)
+    }
+    setDelivery({ ...delivery, custom_fees: nextFees })
+  }
+
+  const resetWilayaFee = (code: string) => {
+    const nextFees = { ...delivery.custom_fees }
+    delete nextFees[code]
+    setDelivery({ ...delivery, custom_fees: nextFees })
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+        <div>
+          <span className="text-xs uppercase tracking-widest text-gray-500 font-medium block">
+            KenDji Luxury &bull; Système &amp; Configuration
+          </span>
+          <h1 className="text-2xl font-serif font-bold text-gray-900 mt-1">
+            Paramètres Généraux &amp; Intégrations
+          </h1>
+          <p className="text-sm text-gray-600 mt-1">
+            Centralisez la gestion de l&apos;identité, des frais de livraison 58 Wilayas, transporteurs et langues.
+          </p>
+        </div>
+
+        {/* Global Feedback notification */}
+        <div className="flex items-center gap-3">
+          {successMsg && (
+            <span className="text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-3.5 py-1.5 rounded-md flex items-center gap-1.5">
+              <Check className="h-4 w-4 text-emerald-600" /> {successMsg}
+            </span>
+          )}
+          {errorMsg && (
+            <span className="text-xs font-medium text-red-700 bg-red-50 border border-red-200 px-3.5 py-1.5 rounded-md">
+              {errorMsg}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="flex border-b border-gray-200 bg-white px-2 rounded-t-lg overflow-x-auto scrollbar-none">
+        {[
+          { id: 'identity', label: '1. Identité & Réseaux', icon: Building },
+          { id: 'contact', label: '2. Contact & SAV', icon: ShieldCheck },
+          { id: 'delivery', label: '3. Tarifs 58 Wilayas', icon: Truck },
+          { id: 'courier', label: '4. Transporteurs', icon: CreditCard },
+          { id: 'telegram', label: '5. Alertes Telegram', icon: Send },
+          { id: 'meta', label: '6. Meta Pixel & CAPI', icon: BarChart3 },
+          { id: 'localization', label: '7. Langues & RTL', icon: Languages }
+        ].map(tab => {
+          const Icon = tab.icon
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+              className={`py-4 px-4 sm:px-6 text-xs uppercase tracking-wider font-medium border-b-2 transition-all whitespace-nowrap flex items-center gap-2 ${
+                activeTab === tab.id
+                  ? 'border-gray-900 text-gray-900 font-semibold'
+                  : 'border-transparent text-gray-500 hover:text-gray-900'
+              }`}
+            >
+              <Icon className="h-3.5 w-3.5" />
+              <span>{tab.label}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Tab 1: Store Identity */}
+      {activeTab === 'identity' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Identité &amp; Réseaux Sociaux</CardTitle>
+            <CardDescription>Nom de marque officiel et canaux de présence digitale.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="brand-name">Nom de Marque (Français/Latin)</Label>
+                <Input
+                  id="brand-name"
+                  value={identity.brand_name}
+                  onChange={e => setIdentity({ ...identity, brand_name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="brand-name-ar">Nom de Marque (Arabe)</Label>
+                <Input
+                  id="brand-name-ar"
+                  dir="rtl"
+                  value={identity.brand_name_ar}
+                  onChange={e => setIdentity({ ...identity, brand_name_ar: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="ident-phone">Téléphone Général</Label>
+                <Input
+                  id="ident-phone"
+                  value={identity.contact_phone}
+                  onChange={e => setIdentity({ ...identity, contact_phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ident-email">Email Général</Label>
+                <Input
+                  id="ident-email"
+                  value={identity.contact_email}
+                  onChange={e => setIdentity({ ...identity, contact_email: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ident-whatsapp">WhatsApp Commercial</Label>
+                <Input
+                  id="ident-whatsapp"
+                  value={identity.whatsapp}
+                  onChange={e => setIdentity({ ...identity, whatsapp: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="ident-instagram">Instagram URL</Label>
+                <Input
+                  id="ident-instagram"
+                  value={identity.instagram}
+                  onChange={e => setIdentity({ ...identity, instagram: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ident-facebook">Facebook URL</Label>
+                <Input
+                  id="ident-facebook"
+                  value={identity.facebook}
+                  onChange={e => setIdentity({ ...identity, facebook: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="ident-tiktok">TikTok URL</Label>
+                <Input
+                  id="ident-tiktok"
+                  value={identity.tiktok}
+                  onChange={e => setIdentity({ ...identity, tiktok: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button
+                onClick={handleSaveIdentity}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Enregistrer la Section'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 2: Contact & Service Client */}
+      {activeTab === 'contact' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Coordonnées &amp; Service Client</CardTitle>
+            <CardDescription>Informations affichées aux clients pour le suivi et l&apos;assistance.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="cs-phone">Ligne Directe SAV</Label>
+                <Input
+                  id="cs-phone"
+                  value={contact.customer_service_phone}
+                  onChange={e => setContact({ ...contact, customer_service_phone: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cs-email">Email Assistance Clients</Label>
+                <Input
+                  id="cs-email"
+                  value={contact.customer_service_email}
+                  onChange={e => setContact({ ...contact, customer_service_email: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2 pt-4 border-t">
+              <Label htmlFor="cs-address">Adresse du Siège / Atelier à Alger</Label>
+              <Input
+                id="cs-address"
+                value={contact.business_address}
+                onChange={e => setContact({ ...contact, business_address: e.target.value })}
+              />
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button
+                onClick={handleSaveContact}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Enregistrer le Contact'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 3: Delivery Fees by Wilaya */}
+      {activeTab === 'delivery' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Gestion des Frais de Livraison (58 Wilayas)</CardTitle>
+            <CardDescription>
+              Modifiez les tarifs à Domicile et en Point Relais (Stop Desk) par Wilaya en dinars algériens (DA).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-gray-50 p-4 rounded-lg border">
+              <div className="flex items-center gap-6">
+                <label className="flex items-center gap-2 text-xs font-semibold text-gray-900 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={delivery.cod_enabled}
+                    onChange={e => setDelivery({ ...delivery, cod_enabled: e.target.checked })}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <span>Paiement à la Livraison (COD) Actif</span>
+                </label>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 font-medium">Mode par défaut:</span>
+                  <select
+                    value={delivery.default_delivery_method}
+                    onChange={e =>
+                      setDelivery({
+                        ...delivery,
+                        default_delivery_method: e.target.value as 'DOMICILE' | 'STOP_DESK'
+                      })
+                    }
+                    className="h-8 px-2 rounded border bg-white text-xs"
+                  >
+                    <option value="DOMICILE">Domicile</option>
+                    <option value="STOP_DESK">Point Relais (Stop Desk)</option>
+                  </select>
+                </div>
+              </div>
+
+              <Button
+                onClick={handleSaveDelivery}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Sauvegarder les Tarifs'}
+              </Button>
+            </div>
+
+            {/* Wilaya Filter */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Rechercher une Wilaya par nom ou code (ex: Alger, 16, Oran, 31)..."
+                value={wilayaSearch}
+                onChange={e => setWilayaSearch(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+
+            {/* 58 Wilayas Table */}
+            <div className="border rounded-lg overflow-hidden max-h-[500px] overflow-y-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead className="bg-gray-100 sticky top-0 z-10 border-b">
+                  <tr>
+                    <th className="p-3 font-semibold text-gray-700">Code</th>
+                    <th className="p-3 font-semibold text-gray-700">Wilaya</th>
+                    <th className="p-3 font-semibold text-gray-700">Tarif Domicile (DA)</th>
+                    <th className="p-3 font-semibold text-gray-700">Tarif Stop Desk (DA)</th>
+                    <th className="p-3 font-semibold text-gray-700 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {filteredWilayas.map(w => {
+                    const custom = delivery.custom_fees[w.code]
+                    const isCustomized = Boolean(custom && (custom.domicile !== undefined || custom.stopDesk !== undefined))
+                    const domicileVal = custom?.domicile !== undefined ? custom.domicile : w.deliveryFeeDomicile
+                    const stopDeskVal = custom?.stopDesk !== undefined ? custom.stopDesk : w.deliveryFeeStopDesk
+
+                    return (
+                      <tr key={w.code} className="hover:bg-gray-50/80">
+                        <td className="p-3 font-mono font-bold text-gray-900">{w.code}</td>
+                        <td className="p-3">
+                          <span className="font-semibold text-gray-900">{w.name}</span>{' '}
+                          {w.nameAr && <span className="text-gray-400 font-sans">({w.nameAr})</span>}
+                          {isCustomized && (
+                            <span className="ml-2 text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-medium">
+                              Personnalisé
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-3">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="50"
+                            value={domicileVal}
+                            onChange={e => updateWilayaFee(w.code, 'domicile', parseInt(e.target.value, 10))}
+                            className="h-8 w-28 text-xs font-mono"
+                          />
+                        </td>
+                        <td className="p-3">
+                          <Input
+                            type="number"
+                            min="0"
+                            step="50"
+                            value={stopDeskVal}
+                            onChange={e => updateWilayaFee(w.code, 'stopDesk', parseInt(e.target.value, 10))}
+                            className="h-8 w-28 text-xs font-mono"
+                          />
+                        </td>
+                        <td className="p-3 text-right">
+                          {isCustomized && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => resetWilayaFee(w.code)}
+                              className="h-7 text-[11px] text-gray-500 hover:text-red-600 flex items-center gap-1"
+                              title="Rétablir tarif par défaut"
+                            >
+                              <RotateCcw className="h-3 w-3" /> Défaut
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 4: Courier Transport */}
+      {activeTab === 'courier' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Intégrations Transporteurs &amp; Logistique</CardTitle>
+            <CardDescription>Sélectionnez le prestataire de livraison actif en Algérie.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="courier-prov">Transporteur Actif</Label>
+                <select
+                  id="courier-prov"
+                  value={courier.active_provider}
+                  onChange={e =>
+                    setCourier({
+                      ...courier,
+                      active_provider: e.target.value as 'YALIDINE' | 'ZR_EXPRESS' | 'MAYSTRO' | 'NOEST'
+                    })
+                  }
+                  className="w-full h-10 px-3 rounded-md border text-sm"
+                >
+                  <option value="YALIDINE">Yalidine Express</option>
+                  <option value="ZR_EXPRESS">ZR Express</option>
+                  <option value="MAYSTRO">Maystro Delivery</option>
+                  <option value="NOEST">Noest Express</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="block">État de l&apos;Intégration</Label>
+                <label className="flex items-center gap-2 mt-3 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={courier.enabled}
+                    onChange={e => setCourier({ ...courier, enabled: e.target.checked })}
+                    className="h-4 w-4 rounded"
+                  />
+                  <span className="font-medium">Transmission automatique des expéditions</span>
+                </label>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 space-y-2">
+              <p className="font-semibold text-gray-900">Sécurité des Clés API Transporteur :</p>
+              <p>
+                Les clés API et secrets de production Yalidine/ZR Express sont gérés de manière sécurisée côté serveur
+                (via les variables d&apos;environnement <code>YALIDINE_API_KEY</code> et <code>YALIDINE_API_SECRET</code>)
+                et ne sont jamais exposées publiquement dans le navigateur client.
+              </p>
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button
+                onClick={handleSaveCourier}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Enregistrer le Transporteur'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 5: Telegram Alerts */}
+      {activeTab === 'telegram' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Notifications de Commandes par Telegram</CardTitle>
+            <CardDescription>
+              Recevez instantanément les alertes de nouvelles commandes et d&apos;expéditions sur votre canal ou groupe Telegram privé.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={telegram.enabled}
+                  onChange={e => setTelegram({ ...telegram, enabled: e.target.checked })}
+                  className="h-4 w-4 rounded"
+                />
+                <span>Activer les Notifications Telegram</span>
+              </label>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="tele-token">
+                  Token du Bot Telegram {telegram.token_configured && <span className="text-emerald-600 text-xs">(Configuré)</span>}
+                </Label>
+                <Input
+                  id="tele-token"
+                  type="password"
+                  placeholder={telegram.token_configured ? '••••••••••••••••••••••••••••' : '123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11'}
+                  value={telegram.bot_token || ''}
+                  onChange={e => setTelegram({ ...telegram, bot_token: e.target.value })}
+                />
+                <p className="text-[11px] text-gray-500">
+                  Laissez vide pour conserver le token actuel déjà enregistré.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="tele-chat-id">Chat ID / Channel ID</Label>
+                <Input
+                  id="tele-chat-id"
+                  placeholder="-1001234567890 ou @votre_canal"
+                  value={telegram.chat_id}
+                  onChange={e => setTelegram({ ...telegram, chat_id: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-3 pt-4 border-t">
+              <Label className="text-xs font-semibold uppercase text-gray-700">Événements Déclencheurs</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { id: 'new_order', label: 'Nouvelle Commande COD' },
+                  { id: 'shipment_created', label: 'Expédition Créée' },
+                  { id: 'delivered', label: 'Colis Livré & Encaissé' }
+                ].map(evt => (
+                  <label key={evt.id} className="flex items-center gap-2 p-3 border rounded-md bg-gray-50 text-xs cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={telegram.events.includes(evt.id as 'new_order' | 'shipment_created' | 'delivered')}
+                      onChange={e => {
+                        const next = e.target.checked
+                          ? [...telegram.events, evt.id as 'new_order' | 'shipment_created' | 'delivered']
+                          : telegram.events.filter(x => x !== evt.id)
+                        setTelegram({ ...telegram, events: next })
+                      }}
+                      className="h-4 w-4 rounded"
+                    />
+                    <span className="font-medium text-gray-900">{evt.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button
+                onClick={handleSaveTelegram}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Enregistrer Telegram'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 6: Meta Pixel & CAPI */}
+      {activeTab === 'meta' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Meta Pixel &amp; Conversions API (CAPI)</CardTitle>
+            <CardDescription>
+              Configurez le tracking publicitaire Meta pour mesurer les événements d&apos;achats et conversions.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="meta-pixel">Meta Pixel ID (Public)</Label>
+              <Input
+                id="meta-pixel"
+                placeholder="123456789012345"
+                value={meta.pixel_id}
+                onChange={e => setMeta({ ...meta, pixel_id: e.target.value })}
+              />
+            </div>
+
+            <div className="pt-4 border-t space-y-4">
+              <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={meta.capi_enabled}
+                  onChange={e => setMeta({ ...meta, capi_enabled: e.target.checked })}
+                  className="h-4 w-4 rounded"
+                />
+                <span>Activer l&apos;API de Conversions côté Serveur (Conversions API)</span>
+              </label>
+
+              <div className="space-y-2">
+                <Label htmlFor="meta-capi-token">
+                  Jeton d&apos;Accès CAPI (Server-Only Secret){' '}
+                  {meta.token_configured && <span className="text-emerald-600 text-xs">(Configuré)</span>}
+                </Label>
+                <Input
+                  id="meta-capi-token"
+                  type="password"
+                  placeholder={meta.token_configured ? '••••••••••••••••••••••••••••' : 'EAAB...'}
+                  value={meta.capi_token || ''}
+                  onChange={e => setMeta({ ...meta, capi_token: e.target.value })}
+                />
+                <p className="text-[11px] text-gray-500">
+                  Le jeton CAPI reste strictement confidentiel sur le serveur et n&apos;est jamais renvoyé au navigateur.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button
+                onClick={handleSaveMeta}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Enregistrer Meta'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tab 7: Localization & Languages */}
+      {activeTab === 'localization' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Localisation, Langues &amp; Support RTL</CardTitle>
+            <CardDescription>
+              Gérez les langues de la boutique en ligne avec basculement automatique de direction (LTR / RTL).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="loc-default">Langue Principale par Défaut</Label>
+                <select
+                  id="loc-default"
+                  value={localization.default_language}
+                  onChange={e =>
+                    setLocalization({
+                      ...localization,
+                      default_language: e.target.value as 'fr' | 'ar' | 'en'
+                    })
+                  }
+                  className="w-full h-10 px-3 rounded-md border text-sm"
+                >
+                  <option value="fr">Français (FR - LTR)</option>
+                  <option value="ar">العربية (AR - RTL)</option>
+                  <option value="en">English (EN - LTR)</option>
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <Label className="block text-xs font-semibold uppercase text-gray-700">Langues Activées</Label>
+                <div className="space-y-2">
+                  {[
+                    { id: 'fr', label: 'Français (FR)', dir: 'LTR' },
+                    { id: 'ar', label: 'العربية (AR)', dir: 'RTL' },
+                    { id: 'en', label: 'English (EN)', dir: 'LTR' }
+                  ].map(lang => (
+                    <label key={lang.id} className="flex items-center justify-between p-3 border rounded bg-gray-50 text-xs cursor-pointer">
+                      <span className="font-semibold text-gray-900">{lang.label}</span>
+                      <span className="text-[10px] text-gray-500 bg-white px-2 py-0.5 rounded border uppercase">{lang.dir}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t flex justify-end">
+              <Button
+                onClick={handleSaveLocalization}
+                disabled={isSaving}
+                className="bg-gray-900 hover:bg-black text-white text-xs uppercase tracking-wider"
+              >
+                {isSaving ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : 'Enregistrer la Localisation'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  )
+}

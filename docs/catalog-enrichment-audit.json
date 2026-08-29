@@ -1,0 +1,914 @@
+[
+  {
+    "productNumber": 1,
+    "folderName": "product 1",
+    "sku": "KDL-FLW-SET-01",
+    "name": "Floral Enamel Bracelet and Ring Set",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/product 1/Price.txt",
+    "category": "Sets",
+    "collection": "Romantic Nature",
+    "pieces_included": "2 Pieces (Floral Cuff Bracelet + Matching Ring)",
+    "variants_count": 3,
+    "variants_list": [
+      "Blanc Émail",
+      "Noir Émail",
+      "Rose Poudré"
+    ],
+    "verified": {
+      "name": "Floral Enamel Bracelet and Ring Set",
+      "sku": "KDL-FLW-SET-01",
+      "price": 1200,
+      "category": "Sets",
+      "collection": "Romantic Nature",
+      "pieces_included": "2 Pieces (Floral Cuff Bracelet + Matching Ring)",
+      "metallic_finish": "Polished gold-tone with smooth petal bezels.",
+      "stones_or_inserts": "High-gloss enamel fill in White, Black, and Blush Rose.",
+      "approved_images_count": 3
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Bold statement floral cuff and matching ring set featuring high-gloss enamel petal inserts and polished gold-tone contours.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 2,
+    "folderName": "Product 2",
+    "sku": "KDL-CLV-SET-01",
+    "name": "Quatrefoil Clover 4-Piece Jewelry Set",
+    "price_dzd": 1500,
+    "price_source": "Kendji Boutique/Product 2/Price.txt",
+    "category": "Sets",
+    "collection": "Signature Motifs",
+    "pieces_included": "4 Pieces (5-Motif Necklace, 3-Motif Bracelet, Stud Earrings, Ring)",
+    "variants_count": 3,
+    "variants_list": [
+      "Noir Onyx",
+      "Or Texturé",
+      "Blanc Nacre"
+    ],
+    "verified": {
+      "name": "Quatrefoil Clover 4-Piece Jewelry Set",
+      "sku": "KDL-CLV-SET-01",
+      "price": 1500,
+      "category": "Sets",
+      "collection": "Signature Motifs",
+      "pieces_included": "4 Pieces (5-Motif Necklace, 3-Motif Bracelet, Stud Earrings, Ring)",
+      "metallic_finish": "Polished gold-tone chains with micro-beaded border contours.",
+      "stones_or_inserts": "Smooth onyx black, guilloché textured gold, and luminous mother-of-pearl white inserts.",
+      "approved_images_count": 3
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Iconic four-leaf clover motif parure comprising necklace, bracelet, stud earrings, and statement ring in contrasting finishes.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 3,
+    "folderName": "Product 3",
+    "sku": "KDL-ROSE-NECK-01",
+    "name": "Rose Pendant Necklace with Gemstone Accents",
+    "price_dzd": 800,
+    "price_source": "Kendji Boutique/Product 3/Price.txt",
+    "category": "Necklaces",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Rose Pendant Necklace with Gemstone Accents",
+      "sku": "KDL-ROSE-NECK-01",
+      "price": 800,
+      "category": "Necklaces",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Necklace)",
+      "metallic_finish": "Polished gold-tone.",
+      "stones_or_inserts": "Rich scarlet bud insert, micro-pavé clear stones, and marquise-cut emerald-tone stone on stem.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Sculpted romantic rose bud pendant on delicate cable link chain with pavé stem and marquise gemstone leaf.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 4,
+    "folderName": "Product 4",
+    "sku": "KDL-CLV-LONG-NECK-01",
+    "name": "Long Quatrefoil Clover Necklace (Sautoir)",
+    "price_dzd": 600,
+    "price_source": "Kendji Boutique/Product 4/Price.txt",
+    "category": "Necklaces",
+    "collection": "Signature Motifs",
+    "pieces_included": "1 Piece (Sautoir Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Long Quatrefoil Clover Necklace (Sautoir)",
+      "sku": "KDL-CLV-LONG-NECK-01",
+      "price": 600,
+      "category": "Necklaces",
+      "collection": "Signature Motifs",
+      "pieces_included": "1 Piece (Sautoir Necklace)",
+      "metallic_finish": "Polished gold-tone chain with textured beaded motif bezels.",
+      "stones_or_inserts": "Smooth contrasting black and white enamel inserts.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Versatile opera-length sautoir chain adorned with spaced quatrefoil clover stations for single or layered styling.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 5,
+    "folderName": "Product 5",
+    "sku": "KDL-MIX-CHAIN-NECK-01",
+    "name": "Mixed Metal Chain Pendant Necklace",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/Product 5/Price.txt",
+    "category": "Necklaces",
+    "collection": "Urban & Iconic",
+    "pieces_included": "1 Piece (Pendant Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Mixed Metal Chain Pendant Necklace",
+      "sku": "KDL-MIX-CHAIN-NECK-01",
+      "price": 1200,
+      "category": "Necklaces",
+      "collection": "Urban & Iconic",
+      "pieces_included": "1 Piece (Pendant Necklace)",
+      "metallic_finish": "Two-tone polished gold and rhodium silver.",
+      "stones_or_inserts": "Micro-pavé clear zirconia crystals on rectangular connector.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Contemporary two-tone statement pendant combining a pavé crystal bar with a bold Cuban chain link segment.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 6,
+    "folderName": "Product 6",
+    "sku": "KDL-INITIAL-S-NECK-01",
+    "name": "Letter \"S\" Pavé Initial Pendant Necklace",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/Product 6/Price.txt",
+    "category": "Necklaces",
+    "collection": "Personalized & Cultural",
+    "pieces_included": "1 Piece (Monogram Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Letter \"S\" Pavé Initial Pendant Necklace",
+      "sku": "KDL-INITIAL-S-NECK-01",
+      "price": 1200,
+      "category": "Necklaces",
+      "collection": "Personalized & Cultural",
+      "pieces_included": "1 Piece (Monogram Necklace)",
+      "metallic_finish": "High-polish gold-tone chain and frame.",
+      "stones_or_inserts": "Full pavé micro-crystals surrounding a black square enamel initial plate.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Personalized monogram medallion with dense pavé stone setting and contrasting black enamel center letter.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 7,
+    "folderName": "Product 7",
+    "sku": "KDL-PAVE-RECT-BRAC-01",
+    "name": "Pavé Rectangular Centerpiece Chain Bracelet",
+    "price_dzd": 1500,
+    "price_source": "Kendji Boutique/Product 7/Price.txt",
+    "category": "Bracelets",
+    "collection": "Urban & Iconic",
+    "pieces_included": "1 Piece (Chain Bracelet)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Pavé Rectangular Centerpiece Chain Bracelet",
+      "sku": "KDL-PAVE-RECT-BRAC-01",
+      "price": 1500,
+      "category": "Bracelets",
+      "collection": "Urban & Iconic",
+      "pieces_included": "1 Piece (Chain Bracelet)",
+      "metallic_finish": "Polished mirror-finish gold-tone.",
+      "stones_or_inserts": "Dense multi-row clear pavé stones.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Heavy-gauge flat curb chain bracelet anchored by a gleaming rectangular plate encrusted with dense crystal pavé.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 8,
+    "folderName": "Product 8",
+    "sku": "KDL-RING-DUO-01",
+    "name": "Gold-Tone Solitaire and Quatrefoil Band Ring Duo",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/Product 8/Price.txt",
+    "category": "Rings",
+    "collection": "Signature Motifs",
+    "pieces_included": "2 Pieces (Solitaire Ring + Clover Band)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Solitaire and Quatrefoil Band Ring Duo",
+      "sku": "KDL-RING-DUO-01",
+      "price": 1200,
+      "category": "Rings",
+      "collection": "Signature Motifs",
+      "pieces_included": "2 Pieces (Solitaire Ring + Clover Band)",
+      "metallic_finish": "Polished gold-tone solitaire band and satin-engraved wide band.",
+      "stones_or_inserts": "Round clear halo centerpiece; subtle accent gems in clover motifs.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Complementary ring pairing featuring a floral halo solitaire and an engraved clover eternity band.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 9,
+    "folderName": "Product 9",
+    "sku": "KDL-VINE-BRAC-01",
+    "name": "Vine and Leaf Stone Bracelet",
+    "price_dzd": 1000,
+    "price_source": "Kendji Boutique/Product 9/Price.txt",
+    "category": "Bracelets",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Bracelet)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Vine and Leaf Stone Bracelet",
+      "sku": "KDL-VINE-BRAC-01",
+      "price": 1000,
+      "category": "Bracelets",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Bracelet)",
+      "metallic_finish": "Polished gold-tone and rhodium accents.",
+      "stones_or_inserts": "Faceted oval and marquise-cut crystal stones with lobster clasp closure.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Organic botanical vine bracelet adorned with alternating marquise crystal leaves and faceted stone stations.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 10,
+    "folderName": "Product 10",
+    "sku": "KDL-2TONE-PAPER-BRAC-01",
+    "name": "Two-Tone Paperclip Chain Bracelet with Pavé Center Link",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/Product 10/Price.txt",
+    "category": "Bracelets",
+    "collection": "Urban & Iconic",
+    "pieces_included": "1 Piece (Paperclip Bracelet)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Two-Tone Paperclip Chain Bracelet with Pavé Center Link",
+      "sku": "KDL-2TONE-PAPER-BRAC-01",
+      "price": 1200,
+      "category": "Bracelets",
+      "collection": "Urban & Iconic",
+      "pieces_included": "1 Piece (Paperclip Bracelet)",
+      "metallic_finish": "Two-tone polished gold-tone links with rhodium silver center link.",
+      "stones_or_inserts": "Dense micro-pavé zirconia crystals on center link.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Elongated paperclip chain links separated by polished gold beads, centered around a contrasting silver pavé link.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 11,
+    "folderName": "Product 11",
+    "sku": "KDL-KNOT-SET-01",
+    "name": "Gold Knot Link 4-Piece Jewelry Set",
+    "price_dzd": 1800,
+    "price_source": "Kendji Boutique/Product 11/Price.txt",
+    "category": "Sets",
+    "collection": "Signature Motifs",
+    "pieces_included": "4 Pieces (Lariat Necklace, Knot Bracelet, Knot Earrings, Knot Ring)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold Knot Link 4-Piece Jewelry Set",
+      "sku": "KDL-KNOT-SET-01",
+      "price": 1800,
+      "category": "Sets",
+      "collection": "Signature Motifs",
+      "pieces_included": "4 Pieces (Lariat Necklace, Knot Bracelet, Knot Earrings, Knot Ring)",
+      "metallic_finish": "High-polish mirror gold-tone finish.",
+      "stones_or_inserts": "Pure metallic sculptural knots without stones.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Sculptural love knot links forming a unified parure with drop lariat necklace, matching bracelet, earrings, and ring.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 12,
+    "folderName": "Product 12",
+    "sku": "KDL-PINK-DROP-NECK-01",
+    "name": "Pink and Clear Stone Drop Pendant Necklace",
+    "price_dzd": 1000,
+    "price_source": "Kendji Boutique/Product 12/Price.txt",
+    "category": "Necklaces",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Collar Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Pink and Clear Stone Drop Pendant Necklace",
+      "sku": "KDL-PINK-DROP-NECK-01",
+      "price": 1000,
+      "category": "Necklaces",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Collar Necklace)",
+      "metallic_finish": "Polished gold-tone prong settings.",
+      "stones_or_inserts": "Faceted light pink and clear teardrop/marquise gemstones.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Luminous pastel pink cushion and pear stones arranged in a V-shaped neckline collar with cascading drops.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 13,
+    "folderName": "Product 13",
+    "sku": "KDL-CHARM-BRAC-01",
+    "name": "Gold Twisted Chain Charm Bracelet",
+    "price_dzd": 1500,
+    "price_source": "Kendji Boutique/Product 13/Price.txt",
+    "category": "Bracelets",
+    "collection": "Personalized & Cultural",
+    "pieces_included": "1 Piece (Charm Bracelet)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold Twisted Chain Charm Bracelet",
+      "sku": "KDL-CHARM-BRAC-01",
+      "price": 1500,
+      "category": "Bracelets",
+      "collection": "Personalized & Cultural",
+      "pieces_included": "1 Piece (Charm Bracelet)",
+      "metallic_finish": "Textured and polished gold-tone.",
+      "stones_or_inserts": "All-metal sculpted 3D charms.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Substantial rope curb chain suspended with assorted symbolic 3D metallic medallions and engraved motifs.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 14,
+    "folderName": "Product 14",
+    "sku": "KDL-QUATREFOIL-DROP-SET-01",
+    "name": "Gold Quatrefoil Drop Pendant and Earring Set",
+    "price_dzd": 2200,
+    "price_source": "Kendji Boutique/Product 14/Price.txt",
+    "category": "Sets",
+    "collection": "Signature Motifs",
+    "pieces_included": "2 Pieces (Tiered Drop Pendant Necklace + Drop Earrings)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold Quatrefoil Drop Pendant and Earring Set",
+      "sku": "KDL-QUATREFOIL-DROP-SET-01",
+      "price": 2200,
+      "category": "Sets",
+      "collection": "Signature Motifs",
+      "pieces_included": "2 Pieces (Tiered Drop Pendant Necklace + Drop Earrings)",
+      "metallic_finish": "Polished gold-tone bezels with beaded edges.",
+      "stones_or_inserts": "Micro-pavé clear stones outlining amber and black central enamel inserts.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Dramatic tiered quatrefoil clover pendant and matching earrings featuring pavé outlines and warm amber accents.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 15,
+    "folderName": "Product 15",
+    "sku": "KDL-HEART-NECK-01",
+    "name": "Minimalist Open Heart Pendant Necklace",
+    "price_dzd": 800,
+    "price_source": "Kendji Boutique/Product 15/Price.txt",
+    "category": "Necklaces",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Minimalist Open Heart Pendant Necklace",
+      "sku": "KDL-HEART-NECK-01",
+      "price": 800,
+      "category": "Necklaces",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Necklace)",
+      "metallic_finish": "High-polish mirror gold-tone.",
+      "stones_or_inserts": "Pure polished metal silhouette.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Clean wireframe open heart outline pendant suspended along a delicate whisper cable chain.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 16,
+    "folderName": "Product 16",
+    "sku": "KDL-PEARL-CHARM-BRAC-01",
+    "name": "Gold-Tone Ocean Charm and Pearl Bracelet",
+    "price_dzd": 1000,
+    "price_source": "Kendji Boutique/Product 16/Price.txt",
+    "category": "Bracelets",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Charm Bracelet)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Ocean Charm and Pearl Bracelet",
+      "sku": "KDL-PEARL-CHARM-BRAC-01",
+      "price": 1000,
+      "category": "Bracelets",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Charm Bracelet)",
+      "metallic_finish": "Polished gold-tone.",
+      "stones_or_inserts": "Round white lustrous pearls with sculptural metallic charms.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Lustrous round white pearls alternating with 3D ocean-inspired charms (starfish, shell, seahorse) on gold chain.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 17,
+    "folderName": "Product 17",
+    "sku": "KDL-BUTTERFLY-NECK-01",
+    "name": "Silver-Tone Pavé Butterfly Pendant Necklace",
+    "price_dzd": 1000,
+    "price_source": "Kendji Boutique/Product 17/Price.txt",
+    "category": "Necklaces",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Pendant Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Silver-Tone Pavé Butterfly Pendant Necklace",
+      "sku": "KDL-BUTTERFLY-NECK-01",
+      "price": 1000,
+      "category": "Necklaces",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Pendant Necklace)",
+      "metallic_finish": "Polished rhodium silver-tone.",
+      "stones_or_inserts": "Dense clear crystal pavé setting.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Dazzling rhodium silver-tone pendant sculpted into a butterfly with wings fully paved in clear micro-crystals.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 18,
+    "folderName": "Product 18",
+    "sku": "KDL-BANGLE-DUO-01",
+    "name": "Gold-Tone Iconic Bangle Duo Set (Nail & Screw Motif)",
+    "price_dzd": 1500,
+    "price_source": "Kendji Boutique/Product 18/Price.txt",
+    "category": "Sets",
+    "collection": "Urban & Iconic",
+    "pieces_included": "2 Pieces (Nail Bangle + Screw Cuff)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Iconic Bangle Duo Set (Nail & Screw Motif)",
+      "sku": "KDL-BANGLE-DUO-01",
+      "price": 1500,
+      "category": "Sets",
+      "collection": "Urban & Iconic",
+      "pieces_included": "2 Pieces (Nail Bangle + Screw Cuff)",
+      "metallic_finish": "Mirror-polished gold finish.",
+      "stones_or_inserts": "Micro-pavé stones on the nail head and curved clasp mechanism.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "High-fashion stacking duo consisting of the curved nail bangle with pavé head and the engraved screw cuff.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 19,
+    "folderName": "Product 19",
+    "sku": "KDL-FLORAL-CUFF-SET-01",
+    "name": "Gold-Tone Floral Cuff Bracelet and Ring Set",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/Product 19/Price.txt",
+    "category": "Sets",
+    "collection": "Romantic Nature",
+    "pieces_included": "2 Pieces (Floral Cuff + Matching Double Ring)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Floral Cuff Bracelet and Ring Set",
+      "sku": "KDL-FLORAL-CUFF-SET-01",
+      "price": 1200,
+      "category": "Sets",
+      "collection": "Romantic Nature",
+      "pieces_included": "2 Pieces (Floral Cuff + Matching Double Ring)",
+      "metallic_finish": "Brushed matte gold petals with mirror-polished outer rims.",
+      "stones_or_inserts": "All-metal textured petals.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Architectural cuff bracelet formed of interlocking satin-brushed 5-petal flowers with a matching double-flower ring.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 20,
+    "folderName": "Product 20",
+    "sku": "KDL-HEART-SNAKE-SET-01",
+    "name": "Gold-Tone Intertwined Heart 4-Piece Jewelry Set",
+    "price_dzd": 800,
+    "price_source": "Kendji Boutique/Product 20/Price.txt",
+    "category": "Sets",
+    "collection": "Personalized & Cultural",
+    "pieces_included": "4 Pieces (Snake Necklace, Snake Bracelet, Heart Earrings, Heart Ring)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Intertwined Heart 4-Piece Jewelry Set",
+      "sku": "KDL-HEART-SNAKE-SET-01",
+      "price": 800,
+      "category": "Sets",
+      "collection": "Personalized & Cultural",
+      "pieces_included": "4 Pieces (Snake Necklace, Snake Bracelet, Heart Earrings, Heart Ring)",
+      "metallic_finish": "High-polish mirror snake chain in gold-tone.",
+      "stones_or_inserts": "All-metal open heart silhouettes.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Fluid cylindrical snake chain parure with intertwined open double-heart pendants representing enduring connection.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 21,
+    "folderName": "Product 21",
+    "sku": "KDL-SWAN-BRAC-01",
+    "name": "Pavé Swan Motif Thin Bangle Bracelet",
+    "price_dzd": 900,
+    "price_source": "Kendji Boutique/Product 21/Price.txt",
+    "category": "Bracelets",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Swan Bangle)",
+    "variants_count": 3,
+    "variants_list": [
+      "Or & Blanc",
+      "Or & Violet",
+      "Argent Rhodié"
+    ],
+    "verified": {
+      "name": "Pavé Swan Motif Thin Bangle Bracelet",
+      "sku": "KDL-SWAN-BRAC-01",
+      "price": 900,
+      "category": "Bracelets",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Swan Bangle)",
+      "metallic_finish": "Polished gold-tone and rhodium silver.",
+      "stones_or_inserts": "Micro-pavé crystals in clear diamond, amethyst violet, and black accents.",
+      "approved_images_count": 4
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Slender rigid bangle crowned with a graceful swan motif encrusted in micro-pavé crystals across classic colorways.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 22,
+    "folderName": "Product 22",
+    "sku": "KDL-KNOT-NECK-02",
+    "name": "Gold-Tone Stone-Encrusted Knot Pendant Necklace",
+    "price_dzd": 1200,
+    "price_source": "Kendji Boutique/Product 22/Price.txt",
+    "category": "Necklaces",
+    "collection": "Signature Motifs",
+    "pieces_included": "1 Piece (Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Stone-Encrusted Knot Pendant Necklace",
+      "sku": "KDL-KNOT-NECK-02",
+      "price": 1200,
+      "category": "Necklaces",
+      "collection": "Signature Motifs",
+      "pieces_included": "1 Piece (Necklace)",
+      "metallic_finish": "Polished gold-tone.",
+      "stones_or_inserts": "Channel-set clear pavé crystals across the knot contour.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Horizontal bar pendant twisting into an infinity knot encrusted with channel-set crystal pavé on fine chain.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 23,
+    "folderName": "Product 23",
+    "sku": "KDL-FLORAL-VINE-BRAC-01",
+    "name": "Gold-Tone Floral Vine Bracelet with Pink Stones",
+    "price_dzd": 1000,
+    "price_source": "Kendji Boutique/Product 23/Price.txt",
+    "category": "Bracelets",
+    "collection": "Romantic Nature",
+    "pieces_included": "1 Piece (Bracelet)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Floral Vine Bracelet with Pink Stones",
+      "sku": "KDL-FLORAL-VINE-BRAC-01",
+      "price": 1000,
+      "category": "Bracelets",
+      "collection": "Romantic Nature",
+      "pieces_included": "1 Piece (Bracelet)",
+      "metallic_finish": "Polished gold-tone.",
+      "stones_or_inserts": "Blush pink center stones with clear halo crystals and crystal leaves.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Graceful garden vine branch with three floral clusters set with blush pink stones and pavé leaves.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 24,
+    "folderName": "Product 24",
+    "sku": "KDL-CALLIGRAPHY-NECK-01",
+    "name": "Gold-Tone Arabic Calligraphy Pendant Necklace",
+    "price_dzd": 1000,
+    "price_source": "Kendji Boutique/Product 24/Price.txt",
+    "category": "Necklaces",
+    "collection": "Personalized & Cultural",
+    "pieces_included": "1 Piece (Pendant Necklace)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Gold-Tone Arabic Calligraphy Pendant Necklace",
+      "sku": "KDL-CALLIGRAPHY-NECK-01",
+      "price": 1000,
+      "category": "Necklaces",
+      "collection": "Personalized & Cultural",
+      "pieces_included": "1 Piece (Pendant Necklace)",
+      "metallic_finish": "Polished gold-tone.",
+      "stones_or_inserts": "Pure sculptural metal script.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Stylized Arabic calligraphy script suspended as a fluid horizontal pendant on delicate gold chain.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  },
+  {
+    "productNumber": 25,
+    "folderName": "Product 25",
+    "sku": "KDL-WATCH-DATEJUST-01",
+    "name": "Two-Tone Black Dial Watch (Datejust Style)",
+    "price_dzd": 1900,
+    "price_source": "Kendji Boutique/Product 25/Price.txt",
+    "category": "Watches",
+    "collection": "Urban & Iconic",
+    "pieces_included": "1 Piece (Timepiece)",
+    "variants_count": 0,
+    "variants_list": [],
+    "verified": {
+      "name": "Two-Tone Black Dial Watch (Datejust Style)",
+      "sku": "KDL-WATCH-DATEJUST-01",
+      "price": 1900,
+      "category": "Watches",
+      "collection": "Urban & Iconic",
+      "pieces_included": "1 Piece (Timepiece)",
+      "metallic_finish": "Two-tone brushed and polished gold/steel finish.",
+      "stones_or_inserts": "Round clear crystal stones set in the fluted bezel.",
+      "approved_images_count": 1
+    },
+    "inferred_qwen": {
+      "visual_styling_cues": "Classic two-tone Jubilee link bracelet watch featuring a sunray black dial, date cyclops lens, and crystal-set fluted bezel.",
+      "gender_positioning": "Women's / Unisex Luxury Fine Jewelry"
+    },
+    "unknown": [
+      "exact_weight_grams",
+      "specific_ring_sizes_eu",
+      "exact_chain_length_cm",
+      "hypoallergenic_lab_certification"
+    ],
+    "conflicts": [],
+    "requires_review": []
+  }
+]
