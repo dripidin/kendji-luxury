@@ -21,7 +21,8 @@ import {
   saveMetaSettingsAction,
   saveLocalizationSettingsAction,
   testCourierConnectionAction,
-  testTelegramNotificationAction
+  testTelegramNotificationAction,
+  testMetaPixelAction
 } from '@/app/admin/actions/settings'
 import { ALGERIA_WILAYAS } from '@/lib/algeria-cities'
 import { Button } from '@/components/ui/button'
@@ -40,7 +41,8 @@ import {
   Truck,
   Building,
   CreditCard,
-  Zap
+  Zap,
+  ExternalLink
 } from 'lucide-react'
 
 interface SettingsManagerProps {
@@ -62,12 +64,14 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const [meta, setMeta] = useState<MetaSettings>(initialSettings.meta)
   const [localization, setLocalization] = useState<LocalizationSettings>(initialSettings.localization)
 
-  // Status states
+  // Status & Test states
   const [isSaving, setIsSaving] = useState(false)
   const [isTestingCourier, setIsTestingCourier] = useState(false)
   const [isTestingTelegram, setIsTestingTelegram] = useState(false)
+  const [isTestingMeta, setIsTestingMeta] = useState(false)
   const [courierTestResult, setCourierTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [telegramTestResult, setTelegramTestResult] = useState<{ success: boolean; message: string } | null>(null)
+  const [metaTestResult, setMetaTestResult] = useState<{ success: boolean; message: string } | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [wilayaSearch, setWilayaSearch] = useState('')
@@ -147,7 +151,11 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
   const handleTestCourier = async () => {
     setIsTestingCourier(true)
     setCourierTestResult(null)
-    const res = await testCourierConnectionAction(courier.active_provider)
+    const res = await testCourierConnectionAction(courier.active_provider, {
+      apiId: courier.api_id,
+      apiToken: courier.api_token,
+      apiKey: courier.api_key
+    })
     setIsTestingCourier(false)
     setCourierTestResult({
       success: res.success,
@@ -163,6 +171,17 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
     setTelegramTestResult({
       success: res.success,
       message: res.success ? res.message || 'Notification envoyée avec succès' : res.error || 'Erreur Telegram'
+    })
+  }
+
+  const handleTestMeta = async () => {
+    setIsTestingMeta(true)
+    setMetaTestResult(null)
+    const res = await testMetaPixelAction(meta.pixel_id, meta.capi_token)
+    setIsTestingMeta(false)
+    setMetaTestResult({
+      success: res.success,
+      message: res.success ? res.message || 'Meta CAPI validé' : res.error || 'Erreur Meta'
     })
   }
 
@@ -194,7 +213,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             Paramètres Généraux &amp; Intégrations
           </h1>
           <p className="text-sm text-gray-600 mt-1">
-            Centralisez la gestion de l&apos;identité, des frais de livraison 58 Wilayas, transporteurs et langues.
+            Centralisez la gestion de l&apos;identité, des frais de livraison 58 Wilayas, transporteurs, alertes Telegram et Meta.
           </p>
         </div>
 
@@ -219,7 +238,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           { id: 'identity', label: '1. Identité & Réseaux', icon: Building },
           { id: 'contact', label: '2. Contact & SAV', icon: ShieldCheck },
           { id: 'delivery', label: '3. Tarifs 58 Wilayas', icon: Truck },
-          { id: 'courier', label: '4. Transporteurs', icon: CreditCard },
+          { id: 'courier', label: '4. Transporteurs & APIs', icon: CreditCard },
           { id: 'telegram', label: '5. Alertes Telegram', icon: Send },
           { id: 'meta', label: '6. Meta Pixel & CAPI', icon: BarChart3 },
           { id: 'localization', label: '7. Langues & RTL', icon: Languages }
@@ -542,52 +561,101 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       {activeTab === 'courier' && (
         <Card>
           <CardHeader>
-            <CardTitle>Intégrations Transporteurs &amp; Logistique</CardTitle>
-            <CardDescription>Sélectionnez le prestataire de livraison actif en Algérie.</CardDescription>
+            <CardTitle>Intégrations Transporteurs &amp; Logistique (Algérie)</CardTitle>
+            <CardDescription>
+              Connectez directement votre compte transporteur pour l&apos;édition automatique des bordereaux et le suivi COD.
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="courier-prov">Transporteur Actif</Label>
+                <Label htmlFor="courier-prov">Prestataire Logistique Actif</Label>
                 <select
                   id="courier-prov"
                   value={courier.active_provider}
                   onChange={e =>
                     setCourier({
                       ...courier,
-                      active_provider: e.target.value as 'YALIDINE' | 'ZR_EXPRESS' | 'MAYSTRO' | 'NOEST'
+                      active_provider: e.target.value as 'YALIDINE' | 'ECOTRACK' | 'ZR_EXPRESS' | 'MAYSTRO' | 'NOEST'
                     })
                   }
-                  className="w-full h-10 px-3 rounded-md border text-sm"
+                  className="w-full h-10 px-3 rounded-md border text-sm bg-white"
                 >
-                  <option value="YALIDINE">Yalidine Express</option>
-                  <option value="ZR_EXPRESS">ZR Express</option>
+                  <option value="YALIDINE">Yalidine Express (Yalitec / Guepex)</option>
+                  <option value="ECOTRACK">Ecotrack DZ (Redex / Conexlog / World Express)</option>
+                  <option value="ZR_EXPRESS">ZR Express (Procolis)</option>
                   <option value="MAYSTRO">Maystro Delivery</option>
                   <option value="NOEST">Noest Express</option>
                 </select>
               </div>
 
               <div className="space-y-2">
-                <Label className="block">État de l&apos;Intégration</Label>
-                <label className="flex items-center gap-2 mt-3 text-sm cursor-pointer">
+                <Label htmlFor="courier-wilaya">Wilaya d&apos;Expédition (Origine)</Label>
+                <select
+                  id="courier-wilaya"
+                  value={courier.origin_wilaya || 16}
+                  onChange={e => setCourier({ ...courier, origin_wilaya: parseInt(e.target.value) || 16 })}
+                  className="w-full h-10 px-3 rounded-md border text-sm bg-white"
+                >
+                  {ALGERIA_WILAYAS.map(w => (
+                    <option key={w.code} value={parseInt(w.code)}>
+                      {w.code} - {w.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* API Credentials inputs */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+              <div className="space-y-2">
+                <Label htmlFor="courier-id">
+                  {courier.active_provider === 'YALIDINE' ? 'API ID / X-User-Id' : 'Identifiant Compte / User'}
+                </Label>
+                <Input
+                  id="courier-id"
+                  placeholder="Ex: 12345678"
+                  value={courier.api_id || ''}
+                  onChange={e => setCourier({ ...courier, api_id: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="courier-token">
+                  {courier.active_provider === 'YALIDINE' ? 'API Token / X-User-Token' : 'Clé API / Token'}
+                  {courier.api_key_configured && <span className="text-emerald-600 text-xs ml-1.5">(Enregistré)</span>}
+                </Label>
+                <Input
+                  id="courier-token"
+                  type="password"
+                  placeholder={courier.api_key_configured ? '••••••••••••••••••••••••••••' : 'Saisir la clé / token API...'}
+                  value={courier.api_token || courier.api_key || ''}
+                  onChange={e => setCourier({ ...courier, api_token: e.target.value, api_key: e.target.value })}
+                />
+                <p className="text-[11px] text-gray-500">
+                  Laissez vide pour conserver les clés sécurisées actuellement enregistrées.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-semibold text-gray-900">Passerelle DZShip &amp; Sécurité Serveur :</p>
+                  <p className="text-gray-500 text-[11px] mt-0.5">
+                    Connecté via la passerelle normalisée <code>freeship.dzbuild.com</code>. Prise en charge officielle des 58 Wilayas et bordereaux A6/A4.
+                  </p>
+                </div>
+                <label className="flex items-center gap-2 cursor-pointer flex-shrink-0">
                   <input
                     type="checkbox"
                     checked={courier.enabled}
                     onChange={e => setCourier({ ...courier, enabled: e.target.checked })}
                     className="h-4 w-4 rounded"
                   />
-                  <span className="font-medium">Transmission automatique des expéditions</span>
+                  <span className="font-semibold text-gray-900">Activer</span>
                 </label>
               </div>
-            </div>
-
-            <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 space-y-3">
-              <p className="font-semibold text-gray-900">Sécurité des Clés API Transporteur :</p>
-              <p>
-                Les clés API et secrets de production Yalidine/ZR Express sont gérés de manière sécurisée côté serveur
-                (via les variables d&apos;environnement <code>YALIDINE_API_KEY</code> et <code>YALIDINE_API_SECRET</code>)
-                et ne sont jamais exposées publiquement dans le navigateur client.
-              </p>
 
               {/* Test courier connection button */}
               <div className="pt-2 flex items-center gap-3">
@@ -600,7 +668,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   className="text-xs bg-white border-gray-300"
                 >
                   {isTestingCourier ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Zap className="h-3.5 w-3.5 mr-1.5 text-amber-600" />}
-                  Tester la connexion {courier.active_provider}
+                  Tester la connexion API ({courier.active_provider})
                 </Button>
                 {courierTestResult && (
                   <span
@@ -633,13 +701,13 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
       {activeTab === 'telegram' && (
         <Card>
           <CardHeader>
-            <CardTitle>Notifications de Commandes par Telegram</CardTitle>
+            <CardTitle>Notifications de Commandes par Bot Telegram</CardTitle>
             <CardDescription>
-              Recevez instantanément les alertes de nouvelles commandes et d&apos;expéditions sur votre canal ou groupe Telegram privé.
+              Recevez instantanément les alertes détaillées de chaque nouvelle commande COD passée sur votre boutique.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm font-semibold cursor-pointer">
                 <input
                   type="checkbox"
@@ -649,6 +717,17 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                 />
                 <span>Activer les Notifications Telegram</span>
               </label>
+
+              {telegram.bot_link && (
+                <a
+                  href={telegram.bot_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-blue-600 hover:underline inline-flex items-center gap-1"
+                >
+                  Ouvrir le Bot Telegram <ExternalLink className="h-3 w-3" />
+                </a>
+              )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
@@ -664,7 +743,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   onChange={e => setTelegram({ ...telegram, bot_token: e.target.value })}
                 />
                 <p className="text-[11px] text-gray-500">
-                  Laissez vide pour conserver le token actuel déjà enregistré.
+                  Créé via @BotFather sur Telegram.
                 </p>
               </div>
 
@@ -676,7 +755,20 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   value={telegram.chat_id}
                   onChange={e => setTelegram({ ...telegram, chat_id: e.target.value })}
                 />
+                <p className="text-[11px] text-gray-500">
+                  ID du groupe/canal ou utilisateur privé (obtenu via @userinfobot).
+                </p>
               </div>
+            </div>
+
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="tele-link">Lien Direct vers le Bot (Optionnel)</Label>
+              <Input
+                id="tele-link"
+                placeholder="https://t.me/KendjiLuxuryBot"
+                value={telegram.bot_link || ''}
+                onChange={e => setTelegram({ ...telegram, bot_link: e.target.value })}
+              />
             </div>
 
             <div className="space-y-3 pt-4 border-t">
@@ -684,7 +776,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { id: 'new_order', label: 'Nouvelle Commande COD' },
-                  { id: 'shipment_created', label: 'Expédition Créée' },
+                  { id: 'shipment_created', label: 'Bordereau Transporteur Généré' },
                   { id: 'delivered', label: 'Colis Livré & Encaissé' }
                 ].map(evt => (
                   <label key={evt.id} className="flex items-center gap-2 p-3 border rounded-md bg-gray-50 text-xs cursor-pointer">
@@ -708,15 +800,15 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             {/* Dry-run telegram notification button */}
             <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <p className="font-semibold text-gray-900">Tester la réception d&apos;alertes :</p>
-                <p className="text-gray-500 text-[11px] mt-0.5">Envoie un message test à votre Chat ID pour vérifier la configuration.</p>
+                <p className="font-semibold text-gray-900">Tester l&apos;envoi instantané :</p>
+                <p className="text-gray-500 text-[11px] mt-0.5">Envoie une alerte test sur votre canal Telegram avec accusé de réception.</p>
               </div>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
                 onClick={handleTestTelegram}
-                disabled={isTestingTelegram || !telegram.chat_id}
+                disabled={isTestingTelegram || (!telegram.chat_id && !telegram.token_configured)}
                 className="text-xs bg-white border-gray-300 flex-shrink-0"
               >
                 {isTestingTelegram ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5 text-blue-600" />}
@@ -727,7 +819,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
             {telegramTestResult && (
               <div
                 className={`p-3 rounded-md text-xs ${
-                  telegramTestResult.success ? 'bg-emerald-50 text-emerald-800' : 'bg-red-50 text-red-800'
+                  telegramTestResult.success ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
                 }`}
               >
                 {telegramTestResult.message}
@@ -753,18 +845,30 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
           <CardHeader>
             <CardTitle>Meta Pixel &amp; Conversions API (CAPI)</CardTitle>
             <CardDescription>
-              Configurez le tracking publicitaire Meta pour mesurer les événements d&apos;achats et conversions.
+              Configurez le tracking publicitaire Meta pour mesurer les événements d&apos;achats et conversions avec déduplication côté serveur.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="meta-pixel">Meta Pixel ID (Public)</Label>
-              <Input
-                id="meta-pixel"
-                placeholder="123456789012345"
-                value={meta.pixel_id}
-                onChange={e => setMeta({ ...meta, pixel_id: e.target.value })}
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="meta-pixel">Meta Pixel ID (Public)</Label>
+                <Input
+                  id="meta-pixel"
+                  placeholder="Ex: 1617383883230571"
+                  value={meta.pixel_id}
+                  onChange={e => setMeta({ ...meta, pixel_id: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="meta-test-code">Code de Test d&apos;Événement (Optionnel)</Label>
+                <Input
+                  id="meta-test-code"
+                  placeholder="Ex: TEST12345 (depuis Events Manager)"
+                  value={meta.test_event_code || ''}
+                  onChange={e => setMeta({ ...meta, test_event_code: e.target.value })}
+                />
+              </div>
             </div>
 
             <div className="pt-4 border-t space-y-4">
@@ -780,7 +884,7 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
 
               <div className="space-y-2">
                 <Label htmlFor="meta-capi-token">
-                  Jeton d&apos;Accès CAPI (Server-Only Secret){' '}
+                  Jeton d&apos;Accès CAPI (Server-Only Access Token){' '}
                   {meta.token_configured && <span className="text-emerald-600 text-xs">(Configuré)</span>}
                 </Label>
                 <Input
@@ -791,9 +895,38 @@ export function SettingsManager({ initialSettings }: SettingsManagerProps) {
                   onChange={e => setMeta({ ...meta, capi_token: e.target.value })}
                 />
                 <p className="text-[11px] text-gray-500">
-                  Le jeton CAPI reste strictement confidentiel sur le serveur et n&apos;est jamais renvoyé au navigateur.
+                  Le jeton CAPI effectue le hachage sécurisé SHA-256 des données clients et garantit le tracking même avec les bloqueurs de publicité.
                 </p>
               </div>
+
+              {/* Test Meta CAPI button */}
+              <div className="p-4 bg-gray-50 rounded-lg border text-xs text-gray-600 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-gray-900">Tester la validation Meta Graph API :</p>
+                  <p className="text-gray-500 text-[11px] mt-0.5">Vérifie l&apos;accès au Pixel et au jeton Conversions API.</p>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleTestMeta}
+                  disabled={isTestingMeta || !meta.pixel_id}
+                  className="text-xs bg-white border-gray-300 flex-shrink-0"
+                >
+                  {isTestingMeta ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <BarChart3 className="h-3.5 w-3.5 mr-1.5 text-indigo-600" />}
+                  Tester le Pixel &amp; CAPI
+                </Button>
+              </div>
+
+              {metaTestResult && (
+                <div
+                  className={`p-3 rounded-md text-xs ${
+                    metaTestResult.success ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-red-50 text-red-800 border border-red-200'
+                  }`}
+                >
+                  {metaTestResult.message}
+                </div>
+              )}
             </div>
 
             <div className="pt-4 border-t flex justify-end">

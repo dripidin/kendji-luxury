@@ -5,6 +5,9 @@ import { createAdminClient } from "@/lib/supabase/admin"
 import { validateAndNormalizeAlgerianPhone } from "@/lib/validation/algerian-phone"
 import { getWilayaByCode, getDeliveryFee } from "@/lib/algeria-cities"
 import { getAllProducts } from "@/lib/catalog"
+import { resolveWilayaFee, getGlobalSettings } from "@/lib/settings"
+import { sendTelegramOrderNotification } from "@/lib/notifications/telegram"
+import { sendMetaPurchaseEvent } from "@/lib/analytics/meta-capi"
 
 // Request validation schema
 const orderItemInputSchema = z.object({
@@ -67,7 +70,7 @@ export interface OrderConfirmationResult {
 /**
  * Server action to create a Cash-on-Delivery (COD) order.
  * Validates Algerian phone, computes authoritative pricing from product catalog,
- * creates customer/order/items in Supabase, and returns an authoritative order receipt.
+ * creates customer/order/items in Supabase, and triggers Telegram alerts & Meta CAPI.
  */
 export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmationResult> {
   try {
@@ -100,55 +103,61 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
     const allProducts = getAllProducts()
     const productMap = new Map(allProducts.map(p => [p.id, p]))
 
-    // 5. Authoritative price calculation & Snapshot creation
     let calculatedSubtotal = 0
     const itemSnapshots: OrderItemSnapshot[] = []
 
     for (const item of items) {
       const product = productMap.get(item.productId)
       if (!product) {
-        return {
-          success: false,
-          error: `Le bijou sélectionné (ID: ${item.productId}) n'est plus disponible.`
-        }
+        return { success: false, error: `Produit introuvable dans le catalogue (ID: ${item.productId})` }
       }
 
-      let variantLabel: string | undefined
+      // Check variant if exists
+      let unitPrice = product.price
+      let variantLabel: string | undefined = undefined
+
       if (item.variantId && product.variants) {
-        const foundVariant = product.variants.find(v => v.id === item.variantId)
-        if (foundVariant) {
-          variantLabel = foundVariant.name
+        const variant = product.variants.find(v => v.id === item.variantId)
+        if (variant) {
+          variantLabel = variant.name
         }
       }
 
-      const authoritativeUnitPrice = product.price
-      const lineTotal = authoritativeUnitPrice * item.quantity
-
+      const lineTotal = unitPrice * item.quantity
       calculatedSubtotal += lineTotal
+
       itemSnapshots.push({
         productId: product.id,
         variantId: item.variantId,
         productNameSnapshot: product.name,
         variantLabelSnapshot: variantLabel,
-        unitPrice: authoritativeUnitPrice,
+        unitPrice,
         quantity: item.quantity,
         lineTotal
       })
     }
 
-    // 6. Calculate authoritative delivery fee and final total
-    const authoritativeDeliveryFee = getDeliveryFee(wilayaObj.code, delivery.deliveryMethod)
+    // 5. Authoritative Delivery Fee calculation taking custom admin rates into account
+    const globalSettings = await getGlobalSettings()
+    const authoritativeDeliveryFee = resolveWilayaFee(
+      wilayaObj.code,
+      delivery.deliveryMethod,
+      globalSettings.delivery?.custom_fees
+    )
+
+    // 6. Authoritative Total
     const calculatedTotal = calculatedSubtotal + authoritativeDeliveryFee
 
-    // 7. Generate customer-facing order number (KJ-2026-XXXX)
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000)
-    const orderNumber = `KJ-2026-${randomSuffix}`
+    // 7. Generate unique human-readable order number
+    const timestamp = Date.now().toString().slice(-4)
+    const randomSuffix = Math.floor(100 + Math.random() * 900)
+    const orderNumber = `KJ-2026-${timestamp}${randomSuffix}`
 
-    // 8. Authoritative database persistence to Supabase
+    // 8. Persist Order to Supabase Database
     try {
       const supabase = createAdminClient()
 
-      // Customer reuse / upsert by normalized phone
+      // Look up or upsert customer record
       let customerId: string | null = null
       const { data: existingCustomer } = await supabase
         .from('customers')
@@ -156,26 +165,26 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
         .eq('phone', normalizedPhone)
         .maybeSingle()
 
-      if (existingCustomer?.id) {
+      if (existingCustomer) {
         customerId = existingCustomer.id
       } else {
-        const { data: newCust, error: custErr } = await supabase
+        const { data: newCustomer } = await supabase
           .from('customers')
           .insert({
-            name: customer.fullName,
+            name: customer.fullName.trim(),
             phone: normalizedPhone,
-            email: customer.email || null
+            email: customer.email && customer.email.trim() !== "" ? customer.email.trim() : null
           })
           .select('id')
           .single()
 
-        if (!custErr && newCust) {
-          customerId = newCust.id
+        if (newCustomer) {
+          customerId = newCustomer.id
         }
       }
 
-      // If customer was created/found, create order record
       if (customerId) {
+        // Insert main order record
         const { data: orderRecord, error: orderErr } = await supabase
           .from('orders')
           .insert({
@@ -213,7 +222,7 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
           // Insert delivery record
           await supabase.from('deliveries').insert({
             order_id: orderRecord.id,
-            provider: 'DOMESTIC_EXPRESS',
+            provider: globalSettings.courier?.active_provider || 'YALIDINE',
             status: 'PENDING'
           })
         }
@@ -222,7 +231,46 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
       console.error("[COD Order] Database insertion log:", dbErr)
     }
 
-    // 9. Return verified order confirmation
+    // 9. Dispatch automated notifications in background (non-blocking)
+    const deliveryMethodLabel = delivery.deliveryMethod === "DOMICILE" ? "Livraison à Domicile" : "Point Relais (Stop-Desk)"
+
+    // A. Telegram Alert
+    sendTelegramOrderNotification({
+      orderNumber,
+      customerName: customer.fullName.trim(),
+      customerPhone: phoneValidation.formatted || normalizedPhone,
+      wilaya: `${wilayaObj.code} - ${wilayaObj.name}`,
+      commune: delivery.commune.trim(),
+      address: delivery.address.trim(),
+      deliveryMethod: deliveryMethodLabel,
+      items: itemSnapshots.map(i => ({
+        name: i.productNameSnapshot,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice
+      })),
+      subtotal: calculatedSubtotal,
+      deliveryFee: authoritativeDeliveryFee,
+      total: calculatedTotal
+    }).catch(err => console.error('[Order Action] Telegram dispatch error:', err))
+
+    // B. Meta Conversions API (CAPI) Purchase Event
+    sendMetaPurchaseEvent({
+      eventId: orderNumber,
+      orderNumber,
+      value: calculatedTotal,
+      currency: 'DZD',
+      fullName: customer.fullName.trim(),
+      phone: normalizedPhone,
+      wilaya: wilayaObj.name,
+      commune: delivery.commune.trim(),
+      items: itemSnapshots.map(i => ({
+        name: i.productNameSnapshot,
+        quantity: i.quantity,
+        unitPrice: i.unitPrice
+      }))
+    }).catch(err => console.error('[Order Action] Meta CAPI dispatch error:', err))
+
+    // 10. Return verified order confirmation
     return {
       success: true,
       orderNumber,
@@ -240,7 +288,7 @@ export async function createCodOrder(rawInput: unknown): Promise<OrderConfirmati
         wilaya: `${wilayaObj.code} - ${wilayaObj.name}`,
         commune: delivery.commune.trim(),
         address: delivery.address.trim(),
-        deliveryMethod: delivery.deliveryMethod === "DOMICILE" ? "Livraison à Domicile" : "Point Relais (Stop-Desk)"
+        deliveryMethod: deliveryMethodLabel
       }
     }
 

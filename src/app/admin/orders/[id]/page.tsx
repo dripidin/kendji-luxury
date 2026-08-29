@@ -103,6 +103,11 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
   const delivery = Array.isArray(orderData.deliveries) ? orderData.deliveries[0] : orderData.deliveries
   const timeline = getOrderTimelineEvents(orderData.id)
 
+  const itemsList = orderData.order_items?.map(i => ({
+    name: i.product_name_snapshot,
+    quantity: i.quantity
+  })) || []
+
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-16">
       
@@ -138,15 +143,15 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
           <div className="bg-white border rounded-xl p-6 shadow-sm space-y-6">
             <h2 className="font-semibold text-sm text-gray-900 flex items-center gap-2 border-b pb-3">
               <User size={16} className="text-gray-500" />
-              <span>Coordonnées Client & Livraison</span>
+              <span>Coordonnées Client &amp; Livraison</span>
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 text-xs">
               <div className="space-y-1.5">
                 <span className="text-[11px] uppercase tracking-wider text-gray-400 font-semibold block">
-                  Destinataire
+                  Nom du Client
                 </span>
-                <p className="font-semibold text-sm text-gray-900">{cust?.name || "Client Invité"}</p>
+                <p className="font-bold text-gray-900 text-sm">{cust?.name || "Client Invité"}</p>
                 <div className="flex items-center gap-1.5 text-gray-600 font-mono">
                   <Phone size={12} />
                   <span>{cust?.phone || "Non renseigné"}</span>
@@ -229,6 +234,13 @@ export default async function OrderDetailPage({ params }: OrderDetailPageProps) 
             trackingNumber={delivery?.tracking_number}
             courierProvider={delivery?.provider}
             initialTimeline={timeline}
+            recipientName={cust?.name || "Client KenDji"}
+            recipientPhone={cust?.phone || "0550000000"}
+            wilaya={orderData.delivery_wilaya}
+            commune={orderData.delivery_commune}
+            address={orderData.delivery_address}
+            deliveryMethod={orderData.payment_method === 'COD' ? 'Livraison COD' : 'Livraison'}
+            items={itemsList}
           />
         </div>
 

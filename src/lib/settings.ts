@@ -25,8 +25,12 @@ export interface CodDeliverySettings {
 }
 
 export interface CourierSettings {
-  active_provider: 'YALIDINE' | 'ZR_EXPRESS' | 'MAYSTRO' | 'NOEST'
+  active_provider: 'YALIDINE' | 'ECOTRACK' | 'ZR_EXPRESS' | 'MAYSTRO' | 'NOEST'
   enabled: boolean
+  api_id?: string
+  api_token?: string
+  api_key?: string
+  origin_wilaya?: number
   api_key_configured?: boolean
 }
 
@@ -34,6 +38,7 @@ export interface TelegramSettings {
   enabled: boolean
   chat_id: string
   bot_token?: string
+  bot_link?: string
   token_configured?: boolean
   events: ('new_order' | 'order_confirmed' | 'shipment_created' | 'delivered' | 'returned')[]
 }
@@ -42,6 +47,7 @@ export interface MetaSettings {
   pixel_id: string
   capi_enabled: boolean
   capi_token?: string
+  test_event_code?: string
   token_configured?: boolean
 }
 
@@ -89,17 +95,21 @@ export const DEFAULT_GLOBAL_SETTINGS: GlobalSettings = {
   courier: {
     active_provider: 'YALIDINE',
     enabled: true,
+    api_id: '',
+    origin_wilaya: 16,
     api_key_configured: false
   },
   telegram: {
     enabled: false,
     chat_id: '',
+    bot_link: 'https://t.me/KendjiLuxuryBot',
     token_configured: false,
     events: ['new_order', 'shipment_created', 'delivered']
   },
   meta: {
     pixel_id: '',
     capi_enabled: false,
+    test_event_code: '',
     token_configured: false
   },
   localization: {
@@ -127,6 +137,7 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
       const integrations = data.integrations || {}
       const loc = data.localization || {}
 
+      const courierData = integrations.courier || {}
       const telegramToken = integrations.telegram?.bot_token
       const metaToken = integrations.meta?.capi_token
 
@@ -156,14 +167,19 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
           custom_fees: deliverySettings.custom_fees || {}
         },
         courier: {
-          active_provider: integrations.courier?.active_provider || 'YALIDINE',
-          enabled: integrations.courier?.enabled ?? true,
-          api_key_configured: Boolean(integrations.courier?.api_key || process.env.YALIDINE_API_KEY)
+          active_provider: courierData.active_provider || 'YALIDINE',
+          enabled: courierData.enabled ?? true,
+          api_id: courierData.api_id || '',
+          api_token: unmaskSecrets ? courierData.api_token : undefined,
+          api_key: unmaskSecrets ? courierData.api_key : undefined,
+          origin_wilaya: courierData.origin_wilaya || 16,
+          api_key_configured: Boolean(courierData.api_token || courierData.api_key || process.env.YALIDINE_API_KEY || process.env.ECOTRACK_API_KEY)
         },
         telegram: {
           enabled: integrations.telegram?.enabled ?? false,
           chat_id: integrations.telegram?.chat_id || '',
           bot_token: unmaskSecrets ? telegramToken : undefined,
+          bot_link: integrations.telegram?.bot_link || DEFAULT_GLOBAL_SETTINGS.telegram.bot_link,
           token_configured: Boolean(telegramToken || process.env.TELEGRAM_BOT_TOKEN),
           events: integrations.telegram?.events || DEFAULT_GLOBAL_SETTINGS.telegram.events
         },
@@ -171,7 +187,8 @@ export async function getGlobalSettings(options?: { unmaskSecrets?: boolean }): 
           pixel_id: integrations.meta?.pixel_id || '',
           capi_enabled: integrations.meta?.capi_enabled ?? false,
           capi_token: unmaskSecrets ? metaToken : undefined,
-          token_configured: Boolean(metaToken || process.env.META_CAPI_ACCESS_TOKEN)
+          test_event_code: integrations.meta?.test_event_code || '',
+          token_configured: Boolean(metaToken || process.env.META_ACCESS_TOKEN || process.env.META_CAPI_ACCESS_TOKEN)
         },
         localization: {
           default_language: loc.default_language || 'fr',
